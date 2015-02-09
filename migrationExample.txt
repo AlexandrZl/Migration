@@ -1,0 +1,13 @@
+1)Liquibase (www.liquibase.org)
+	+ Импорт в БД из XML, YAML, JSON и SQL
+	+ Использует changeset, XML-код для описания операторов
+	+ Встроенная поддержка откатов некоторых типов changeset (createTable)
+
+2)sql2xml (www.redips.net/php/from-mysql-to-xml/)
+	+ Импорт из БД в XML формат
+	- Отсутствие других форматов
+	- Не умеет сохранять в файл
+
+3)json-sql-import (github.com/andywer/json-sql-import)
+	+ Импорт в БД из файла (JSON формат)
+	- Отсутствие других форматов
