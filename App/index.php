@@ -4,8 +4,7 @@
 	global $PDO;
 
 	$parameters = $argv;
-	array_shift($parameters);
+	$invocationFile = array_shift($parameters);
 
-	App::init($parameters, $PDO);
-
+	App::init($invocationFile, $parameters, $PDO);
 ?>

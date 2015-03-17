@@ -5,26 +5,35 @@ class App
 
     private $pathToFile;
     private $xmlParser;
+    private $invocationScript;
 
-    public static function init (array $arguments, PDO $pdo)
+    public static function init ($pathToApp, array $arguments, PDO $pdo)
     {
         self::$pdo = $pdo;
 
-        $app = new App($arguments);
-        $app->run();
+        $app = new App($pathToApp);
+        $app->run($arguments);
     }
 
-    private function __construct ($arguments)
+    private function __construct ($pathToApp)
     {
-        $this->pathToFile = $arguments;
+        $this->invocationScript = $pathToApp;
         $this->xmlParser = new XMLParser();
     }
 
-    private function run ()
+    private function run ($arguments)
     {
-        $command = array_shift($this->pathToFile);
+        $command = array_shift($arguments);
 
-        $this->import($command);
+        switch (strtolower($command)) {
+            case 'import':
+                $this->import($arguments[0]);
+                break;
+            
+            default:
+                $this->commandHelp();
+                break;
+        }
     }
 
     private function import($dataFilePath)
@@ -32,6 +41,14 @@ class App
         $dataObject = $this->xmlParser->parseFile($dataFilePath);
 
         echo "Done. Inserted $dataFilePath rows.\n";
+    }
+
+    private function commandHelp ()
+    {
+        echo "Usage: {$this->invocationScript} <COMMAND> <PATH TO FILE>\n";
+        echo "\n";
+        echo "Commands:\n";
+        echo "  import <path/to/data.xml>   Import the XML file data into your SQL database.\n";
     }
 }
 ?>
