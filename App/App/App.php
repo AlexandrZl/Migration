@@ -30,6 +30,8 @@ class App
     private function import($dataFilePath)
     {
         $dataObject = $this->xmlParser->parseFile($dataFilePath);
+
+        echo "Done. Inserted $dataFilePath rows.\n";
     }
 }
 ?>
