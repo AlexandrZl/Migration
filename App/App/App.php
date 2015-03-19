@@ -3,7 +3,6 @@ class App
 {
     private static $pdo;
 
-    private $pathToFile;
     private $xmlParser;
     private $invocationScript;
 
@@ -39,6 +38,10 @@ class App
     private function import($dataFilePath)
     {
         $dataObject = $this->xmlParser->parseFile($dataFilePath);
+
+        $sql = new TemplatedSQL(self::$pdo);
+
+        $sql->execute($dataObject);
 
         echo "Done. Inserted $dataFilePath rows.\n";
     }
