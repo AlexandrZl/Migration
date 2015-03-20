@@ -1,7 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<note Owner="NLM" Status="MEDLINE">
-<to>Tove</to>
-<from>Jani</from>
-<heading>Reminder</heading>
-<body>Don't forget me this weekend!</body>
-</note>
+<users>
+    <user>
+        <id>1</id>
+        <FirstName>Alex</FirstName>
+        <LastName>G</LastName>
+        <email>test@test1.com</email>
+    </user>
+    <user>
+        <id>2</id>
+        <FirstName>Bob</FirstName>
+        <LastName>J</LastName>
+        <email>test@test2mail.com</email>
+    </user>
+</users>
