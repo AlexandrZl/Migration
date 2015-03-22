@@ -3,9 +3,29 @@ class TemplatedSQL
 {
     private $pdo;
 
+    const INT = 'int(11)',
+          VARCHAR = 'VARCHAR( 250 )';
+
     public function __construct (PDO $pdo)
     {
         $this->pdo = $pdo;
+    }
+
+    private function getType($type)
+    {
+        $result = '';
+        $result = is_numeric($type);
+        if (!$result) {
+            $result = gettype($type);
+        } else {
+            if ((int) $type == (float) $type) {
+                $result = 'integer';
+            } else {
+                $result = 'double';
+            }
+        }
+
+        return $result;
     }
 
     private function QueryInsert ($table, $fields)
@@ -14,23 +34,20 @@ class TemplatedSQL
 
         foreach($fields as $field => $type)
         {
-            if (end($fields) == $type) {
-                $sql.= " $field";
-            } else {
-                $sql.= " $field,";
+            if ($type->count() == 0) {
+                $sql .= " $field,";
             }
         }
-
+        $sql = substr($sql, 0, -1);
         $sql.= ") values (";
 
         foreach($fields as $field => $type)
         {
-            if (end($fields) == $type) {
-                $sql.= "'$type' ";
-            } else {
-                $sql.= "'$type', ";
+            if ($type->count() == 0) {
+                $sql .= "'$type',";
             }
         }
+        $sql = substr($sql, 0, -1);
 
         $sql .= ")";
 
@@ -41,16 +58,30 @@ class TemplatedSQL
     {
         $sql ="CREATE TABLE IF NOT EXISTS $table ( ";
 
-        foreach ($fields as $value) {
-            if (end($fields) == $value) {
-                    $sql.=$value." VARCHAR( 250 ) NOT NULL);";
+        $i = 0;
+        foreach ($fields['name'] as $value) {
+            if (end($fields['name']) == $value) {
+                    if ($fields['type'][$i] == 'string') {
+                        $sql.=$value." ".self::VARCHAR." NOT NULL);";
+                    } else if ($fields['type'][$i] == 'integer') {
+                        $sql.=$value." ".self::INT." NOT NULL);";
+                    } else if ($fields['type'][$i] == 'double') {
+                        $sql.=$value." ".self::INT." NOT NULL);";
+                    }
             } else {
                 if ($value == 'id') {
                     $sql.=$value." int(11) AUTO_INCREMENT PRIMARY KEY,";
                 } else {
-                    $sql.=$value." VARCHAR( 250 ) NOT NULL,";
+                    if ($fields['type'][$i] == 'string') {
+                        $sql.=$value." ".self::VARCHAR." NOT NULL,";
+                    } else if ($fields['type'][$i] == 'integer') {
+                        $sql.=$value." ".self::INT." NOT NULL,";
+                    } else if ($fields['type'][$i] == 'double') {
+                        $sql.=$value." ".self::INT." NOT NULL,";
+                    }
                 }
             }
+            $i++;
         }
         $this->pdo->exec($sql);
     }
@@ -62,7 +93,10 @@ class TemplatedSQL
 
         foreach ($data->children()->children() as $child)
         {
-            $fields[] = $child->getName();
+            if ($child->count() == 0) {
+                $fields['name'][] = $child->getName();
+                $fields['type'][] = $this->getType($child->__toString());
+            }
         }
 
         $this->QueryCreateTable($table, $fields);
