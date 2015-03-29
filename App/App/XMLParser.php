@@ -20,11 +20,7 @@ class XMLParser
     }
     
     public function parseXML ($xmlString)
-    {   
-        // $p = xml_parser_create();
-        // xml_parse_into_struct($p, $contents, $vals, $index);
-        // xml_parser_free($p);
-
+    {
         return new SimpleXMLElement($xmlString);
     }
 }
