@@ -18,6 +18,14 @@ class BookRepository
         $this->getContent();
     }
 
+    public function fetchNext()
+    {
+        $book = new Book($this->xmlIterator->current());
+        $this->xmlIterator->next();
+
+        return $book;
+    }
+
     private function getContent()
     {
         $path = $this->path;
@@ -27,21 +35,13 @@ class BookRepository
 
         $this->xmlIterator = new ArrayIterator($this->xmlObj);
     }
-
-    public function fetchNext()
-    {
-        $book = new Book($this->xmlIterator->current());
-        $this->xmlIterator->next();
-
-        return $book;
-    }
 }
 
-$booksRepo = new BookRepository("books.xml");
-$book = $booksRepo->fetchNext();
-//$book1 = $booksRepo->fetchNext();
-
-echo $book->bid;
+//$booksRepo = new BookRepository("books.xml");
+//$book = $booksRepo->fetchNext();
+////$book1 = $booksRepo->fetchNext();
+//
+//echo $book->bid;
 
 
 

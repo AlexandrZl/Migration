@@ -7,12 +7,15 @@
  */
 
 require_once 'App/App/BookRepository.php';
+require_once 'App/App/Book.php';
+$CONFIG = require_once 'App/autoload/config.php';
 
 class XmlRepositoryTest extends PHPUnit_Framework_TestCase {
 
     protected $dir = '';
 
     public function setUp() {
+
         $content = <<<EOL
 <?xml version="1.0" encoding="UTF-8"?>
 <books>
@@ -27,6 +30,27 @@ EOL;
 
         $this->dir = "/tmp/" . md5(time());
         file_put_contents($this->dir . "books.xml", $content);
+
+        global $CONFIG;
+
+        $dsn = "mysql:dbname={$CONFIG['db_name']};host={$CONFIG['db_host']}";
+        $pdo = new PDO($dsn, $CONFIG['db_user'], $CONFIG['db_pass'], array(
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
+        ));
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $this->pdo = $pdo;
+
+        $sql = <<<EOD
+
+	CREATE TABLE IF NOT EXISTS `book` (
+	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  `title` varchar(100) NOT NULL,
+	  PRIMARY KEY (`id`)
+	) AUTO_INCREMENT=1 ;
+
+EOD;
+        $pdo->exec($sql);
     }
 
     public function testBookReps() {
@@ -45,6 +69,7 @@ EOL;
 
     public function tearDown() {
         unlink($this->dir."books.xml");
+        $this->pdo->exec("DROP TABLE book ");
     }
 
 }
