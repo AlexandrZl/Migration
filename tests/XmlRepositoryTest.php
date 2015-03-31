@@ -55,15 +55,18 @@ EOD;
 
     public function testBookReps() {
         $book_repository = new BookRepository($this->dir . "books.xml");
+
         $book1 = $book_repository->fetchNext();
         $book2 = $book_repository->fetchNext();
+
         $this->assertEquals('Book', get_class($book1));
         $this->assertEquals('10', $book1->bid);
         $this->assertEquals('War and peace', $book1->booktitle);
         $this->assertEquals('11', $book2->bid);
         $this->assertEquals('Anna Karenina', $book2->booktitle);
-
         $this->assertEquals(NULL, $book1->book);
+
+        $book_repository->execute();
     }
 
 

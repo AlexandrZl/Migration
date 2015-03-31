@@ -1,7 +1,6 @@
 <?php
 
-require_once "Book.php";
-require_once "XMLParser.php";
+include_once('autoload.php');
 
 class BookRepository
 {
@@ -35,12 +34,22 @@ class BookRepository
 
         $this->xmlIterator = new ArrayIterator($this->xmlObj);
     }
+
+    public function execute()
+    {
+        global $PDO;
+
+        $sql = new TemplatedSQL($PDO);
+
+        $sql->execute($this->xmlObj);
+    }
 }
 
-//$booksRepo = new BookRepository("books.xml");
+$booksRepo = new BookRepository("books.xml");
+$booksRepo->execute();
 //$book = $booksRepo->fetchNext();
-////$book1 = $booksRepo->fetchNext();
-//
+//$book1 = $booksRepo->fetchNext();
+
 //echo $book->bid;
 
 

@@ -14,6 +14,7 @@ class TemplatedSQL
     private function getType($type)
     {
         $result = '';
+        $type = (string) $type;
         $result = is_numeric($type);
         if (!$result) {
             $result = gettype($type);
@@ -24,7 +25,6 @@ class TemplatedSQL
                 $result = 'double';
             }
         }
-
         return $result;
     }
 
@@ -35,9 +35,14 @@ class TemplatedSQL
         foreach($fields as $field => $type)
         {
             if ($type->count() == 0) {
-                $sql .= " $field,";
+                $sql .= "$field,";
             }
         }
+        foreach($fields->attributes() as $field => $name)
+        {
+                $sql .= " $field,";
+        }
+
         $sql = substr($sql, 0, -1);
         $sql.= ") values (";
 
@@ -46,6 +51,10 @@ class TemplatedSQL
             if ($type->count() == 0) {
                 $sql .= "'$type',";
             }
+        }
+        foreach($fields->attributes() as $field => $name)
+        {
+            $sql .= " $name,";
         }
         $sql = substr($sql, 0, -1);
 
@@ -88,15 +97,21 @@ class TemplatedSQL
 
     public function execute ($data)
     {
-        $table = $data->getName();
+        $table = "books";
         $fields = array();
 
-        foreach ($data->children()->children() as $child)
-        {
-            if ($child->count() == 0) {
-                $fields['name'][] = $child->getName();
-                $fields['type'][] = $this->getType($child->__toString());
+        foreach ($data as $child) {
+            $attr = $child->attributes();
+
+            foreach ($attr as $key => $value) {
+                $fields['name'][] = $key;
+                $fields['type'][] = $this->getType($value);
             }
+            foreach ($child as $val => $key) {
+                $fields['name'][] = $val;
+                $fields['type'][] = $this->getType($key);
+            }
+            break;
         }
 
         $this->QueryCreateTable($table, $fields);
