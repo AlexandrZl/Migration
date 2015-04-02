@@ -1,5 +1,11 @@
 <?php
 
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/Book.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/XMLParser.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/TemplatedSQL.php');
+
+$PDO = require_once(realpath(dirname(__FILE__) . '/..') . '/autoload/database.php');
+
 class MigrationTest extends PHPUnit_Framework_TestCase
 {
     public $path;

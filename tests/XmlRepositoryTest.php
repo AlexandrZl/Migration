@@ -6,13 +6,15 @@
  * Time: 15:37
  */
 
-require_once 'App/App/BookRepository.php';
-require_once 'App/App/Book.php';
-$CONFIG = require_once 'App/autoload/config.php';
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/BookRepository.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/Book.php');
+
+$PDO = require_once(realpath(dirname(__FILE__) . '/..') . '/autoload/database.php');
 
 class XmlRepositoryTest extends PHPUnit_Framework_TestCase {
 
     protected $dir = '';
+    protected $pdo;
 
     public function setUp() {
 
@@ -40,21 +42,10 @@ EOL;
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $this->pdo = $pdo;
-
-        $sql = <<<EOD
-
-	CREATE TABLE IF NOT EXISTS `book` (
-	  `id` int(11) NOT NULL AUTO_INCREMENT,
-	  `title` varchar(100) NOT NULL,
-	  PRIMARY KEY (`id`)
-	) AUTO_INCREMENT=1 ;
-
-EOD;
-        $pdo->exec($sql);
     }
 
     public function testBookReps() {
-        $book_repository = new BookRepository($this->dir . "books.xml");
+        $book_repository = new BookRepository($this->dir . "books.xml", "book");
 
         $book1 = $book_repository->fetchNext();
         $book2 = $book_repository->fetchNext();
@@ -66,7 +57,13 @@ EOD;
         $this->assertEquals('Anna Karenina', $book2->booktitle);
         $this->assertEquals(NULL, $book1->book);
 
-        $book_repository->execute();
+        $book_repository->push($this->pdo);
+
+        $sql = $this->pdo->prepare("SELECT id, title FROM book WHERE id = '10'");
+        $sql->execute();
+        $row = $sql->fetch();
+
+        $this->assertEquals('War and peace', $row['title']);
     }
 
 

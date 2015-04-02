@@ -1,18 +1,19 @@
 <?php
 
-include_once('autoload.php');
+include_once(realpath(dirname(__FILE__) . '/..') . '/autoload/autoload.php');
 
 class BookRepository
 {
     private $path;
     private $xmlObj;
     private $xmlParser;
-    private $tagName = "book";
+    private $tagName;
     private $xmlIterator;
 
-    public function __construct ($path)
+    public function __construct ($path, $tagName)
     {
         $this->path = $path;
+        $this->tagName = $tagName;
         $this->xmlParser = new XMLParser();
         $this->getContent();
     }
@@ -35,21 +36,27 @@ class BookRepository
         $this->xmlIterator = new ArrayIterator($this->xmlObj);
     }
 
-    public function execute()
+    public function push($pdo)
     {
-        global $PDO;
+        $templatedSQL = new TemplatedSQL($pdo);
 
-        $sql = new TemplatedSQL($PDO);
-
-        $sql->execute($this->xmlObj);
+        $templatedSQL->execute($this->xmlObj, $this->tagName);
     }
 }
 
-$booksRepo = new BookRepository("books.xml");
-$booksRepo->execute();
+//global $PDO;
+//$booksRepo = new BookRepository("books.xml", 'book');
+//$booksRepo->push($PDO);
+
+//$sth = $PDO->prepare("SELECT id, title FROM book WHERE id = '10'");
+//$sth->execute();
+//$test = $sth->fetch();
+//var_dump($test['title']);
+
+
 //$book = $booksRepo->fetchNext();
 //$book1 = $booksRepo->fetchNext();
-
+//
 //echo $book->bid;
 
 

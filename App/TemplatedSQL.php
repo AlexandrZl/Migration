@@ -34,13 +34,11 @@ class TemplatedSQL
 
         foreach($fields as $field => $type)
         {
-            if ($type->count() == 0) {
-                $sql .= "$field,";
-            }
+            $sql .= "$field,";
         }
         foreach($fields->attributes() as $field => $name)
         {
-                $sql .= " $field,";
+            $sql .= " $field,";
         }
 
         $sql = substr($sql, 0, -1);
@@ -48,9 +46,7 @@ class TemplatedSQL
 
         foreach($fields as $field => $type)
         {
-            if ($type->count() == 0) {
-                $sql .= "'$type',";
-            }
+            $sql .= "'$type',";
         }
         foreach($fields->attributes() as $field => $name)
         {
@@ -95,9 +91,9 @@ class TemplatedSQL
         $this->pdo->exec($sql);
     }
 
-    public function execute ($data)
+    public function execute ($data, $tableName)
     {
-        $table = "books";
+        $table = $tableName;
         $fields = array();
 
         foreach ($data as $child) {
