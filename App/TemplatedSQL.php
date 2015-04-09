@@ -30,31 +30,35 @@ class TemplatedSQL
 
     private function QueryInsert ($table, $fields)
     {
-        $sql = "INSERT INTO $table (";
+        $arrayFields = array();
 
-        foreach($fields as $field => $type)
+        $sqlTable = "INSERT INTO $table (";
+        $sqlValue = ") values (";
+
+        foreach($fields->children() as $field => $value)
         {
-            $sql .= "$field,";
-        }
-        foreach($fields->attributes() as $field => $name)
-        {
-            $sql .= " $field,";
+            if (!in_array($field, $arrayFields)) {
+                $sqlTable .= "$field,";
+                $sqlValue .= "'$value',";
+            }
+            $arrayFields[] = $field;
         }
 
-        $sql = substr($sql, 0, -1);
-        $sql.= ") values (";
-
-        foreach($fields as $field => $type)
+        foreach($fields->attributes() as $field => $value)
         {
-            $sql .= "'$type',";
+            if (!in_array($field, $arrayFields)) {
+                $sqlTable .= " $field,";
+                $sqlValue .= "'$value',";
+            }
+            $arrayFields[] = $field;
         }
-        foreach($fields->attributes() as $field => $name)
-        {
-            $sql .= " $name,";
-        }
-        $sql = substr($sql, 0, -1);
 
-        $sql .= ")";
+        $sqlTable = substr($sqlTable, 0, -1);
+        $sqlValue = substr($sqlValue, 0, -1);
+
+        $sqlValue .= ")";
+
+        $sql = $sqlTable.$sqlValue;
 
         $this->pdo->exec($sql);
     }
