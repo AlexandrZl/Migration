@@ -9,18 +9,20 @@ class BookRepository
     private $xmlParser;
     private $tagName;
     private $xmlIterator;
+    private $reference;
 
-    public function __construct ($path, $tagName)
+    public function __construct ($path, $tagName, $reference)
     {
         $this->path = $path;
         $this->tagName = $tagName;
+        $this->reference = $reference;
         $this->xmlParser = new XMLParser();
         $this->getContent();
     }
 
     public function fetchNext()
     {
-        $book = new Book($this->xmlIterator->current());
+        $book = new Book($this->xmlIterator->current(), $this->reference);
         $this->xmlIterator->next();
 
         return $book;
@@ -44,8 +46,9 @@ class BookRepository
     }
 }
 
-//global $PDO;
-//$booksRepo = new BookRepository("books.xml", 'book');
+global $PDO;
+$booksRepo = new BookRepository("test.xml", 'book', 'authors');
+$book = $booksRepo->fetchNext();
 //$booksRepo->push($PDO);
 
 //$sth = $PDO->prepare("SELECT id, title FROM book WHERE id = '10'");

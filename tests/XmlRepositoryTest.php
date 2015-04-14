@@ -45,7 +45,7 @@ EOL;
     }
 
     public function testBookReps() {
-        $book_repository = new BookRepository($this->dir . "books.xml", "book");
+        $book_repository = new BookRepository($this->dir . "books.xml", "book", null);
 
         $book1 = $book_repository->fetchNext();
         $book2 = $book_repository->fetchNext();
