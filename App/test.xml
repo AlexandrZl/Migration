@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <books>
     <book id="1">
-        <name>White Fang</name>
+        <title>White Fang</title>
         <authors>
             <author id="1">
                 <firstName>Jack</firstName>
@@ -14,7 +14,7 @@
         </authors>
     </book>
     <book id="2">
-        <name>For Whom the Bell Tolls</name>
+        <title>For Whom the Bell Tolls</title>
         <authors>
             <author id="2">
                 <firstName>Ernest</firstName>
