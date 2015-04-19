@@ -36,17 +36,25 @@ class BookRepository
         $this->xmlIterator = new ArrayIterator($this->xmlObj);
     }
 
+    public function apply()
+    {
+
+    }
+
     public function push($pdo)
     {
-        $templatedSQL = new TemplatedSQL($pdo);
 
-        $templatedSQL->execute($this->xmlObj, $this->tagName);
+//        $templatedSQL = new TemplatedSQL($pdo);
+
+//        $templatedSQL->execute($this->xmlObj, $this->tagName);
     }
 }
 
 global $PDO;
-$booksRepo = new BookRepository("test.xml", 'book');
+$booksRepo = new BookRepository("books.xml", 'book');
 $book = $booksRepo->fetchNext();
+$book->getObject();
+
 //$booksRepo->push($PDO);
 
 //$sth = $PDO->prepare("SELECT id, title FROM book WHERE id = '10'");

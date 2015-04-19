@@ -8,6 +8,10 @@
 
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/BookRepository.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/Book.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/Fields.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/ReferenceFieldMultiple.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/StringField.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/PrimaryField.php');
 
 $PDO = require_once(realpath(dirname(__FILE__) . '/..') . '/autoload/database.php');
 
@@ -45,17 +49,16 @@ EOL;
     }
 
     public function testBookReps() {
-        $book_repository = new BookRepository($this->dir . "books.xml", "book", null);
+        $book_repository = new BookRepository($this->dir . "books.xml", "book");
 
         $book1 = $book_repository->fetchNext();
         $book2 = $book_repository->fetchNext();
 
         $this->assertEquals('Book', get_class($book1));
-        $this->assertEquals('10', $book1->bid);
-        $this->assertEquals('War and peace', $book1->booktitle);
-        $this->assertEquals('11', $book2->bid);
-        $this->assertEquals('Anna Karenina', $book2->booktitle);
-        $this->assertEquals(NULL, $book1->book);
+        $this->assertEquals('10', $book1->id);
+        $this->assertEquals('War and peace', $book1->title);
+        $this->assertEquals('11', $book2->id);
+        $this->assertEquals('Anna Karenina', $book2->title);
 
         $book_repository->push($this->pdo);
 

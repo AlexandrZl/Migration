@@ -4,35 +4,49 @@ class ReferenceFieldMultiple extends Fields
 {
     private $reference;
     private $entity;
+    private $map = array();
 
     public function __construct ($entity, $reference)
     {
         $this->reference = $reference;
         $this->entity = $entity;
+
+        $this->map = array(
+            'id' => new PrimaryField('id'),
+            'firstName' => new StringField('firstName'),
+            'lastName' => new StringField('lastName'),
+        );
+    }
+
+    public function getEntity()
+    {
+        return $this->entity;
     }
 
     protected function getValue()
     {
-        $result = null;
+        $xml = $this->xml->xpath($this->reference);
+        $objects = array();
+        $i = 0;
 
-        if ($this->xml) {
-            $attr = $this->xml->attributes();
-
-            if ($attr) {
-                foreach ($attr as $child => $value) {
-                    if ($child == $this->fieldName) {
-                        $result = trim($value);
-                        break;
-                    }
+        foreach ($xml as $object) {
+            foreach ($object as $child) {
+                foreach ($this->map as $key => $field) {
+                    $objects[$i][$key] = $field->value($child);
                 }
-            }
+                $i++;
 
-            if (empty($result)) {
-                $result = $this->xml->xpath($this->fieldName);
-                $result = $result ? $result[0] : null;
             }
         }
 
-        return $result;
+        $objects = $this->mappedDb($objects);
+
+        return $objects;
+    }
+
+    protected function mappedDb($objects)
+    {
+        $sqlObject = new MappedSQL($objects);
+        $sqlObject->apply();
     }
 }
