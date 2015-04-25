@@ -23,7 +23,7 @@ class ReferenceFieldMultiple extends Fields
         return $this->entity;
     }
 
-    protected function getValue()
+    protected function getValuePath()
     {
         $xml = $this->xml->xpath($this->reference);
         $objects = array();
@@ -34,19 +34,16 @@ class ReferenceFieldMultiple extends Fields
                 foreach ($this->map as $key => $field) {
                     $objects[$i][$key] = $field->value($child);
                 }
+                $this->mappedDb($this->map, $this->entity);
                 $i++;
-
             }
         }
-
-        $objects = $this->mappedDb($objects);
-
         return $objects;
     }
 
-    protected function mappedDb($objects)
+    protected function mappedDb($object, $entity)
     {
-        $sqlObject = new MappedSQL($objects);
+        $sqlObject = new MappedSQL($object, $entity);
         $sqlObject->apply();
     }
 }

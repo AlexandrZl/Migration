@@ -2,14 +2,7 @@
 
 class StringField extends Fields
 {
-    private $fieldName;
-
-    public function __construct ($name)
-    {
-        $this->fieldName = $name;
-    }
-
-    protected function getValue()
+    protected function getValuePath()
     {
         $result = null;
 
@@ -30,6 +23,8 @@ class StringField extends Fields
                 $result = $result ? $result[0] : null;
             }
         }
+
+        $this->fieldValue = $result;
 
         return $result;
     }

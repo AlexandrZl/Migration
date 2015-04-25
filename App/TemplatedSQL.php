@@ -11,6 +11,20 @@ class TemplatedSQL
         $this->pdo = $pdo;
     }
 
+    public function findById($id, $type)
+    {
+        $result = false;
+
+        $q = $this->pdo->prepare("SELECT * FROM mappedDB WHERE external_id = :id and type = :type limit 1");
+        $q->bindValue(':id', $id);
+        $q->bindValue(':type', $type);
+        $q->execute();
+
+        if($q->fetch(PDO::FETCH_ASSOC)) $result = true;
+
+        return $result;
+    }
+
     private function getType($type)
     {
         $result = '';
