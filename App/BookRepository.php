@@ -21,10 +21,13 @@ class BookRepository
 
     public function fetchNext()
     {
-        $book = new Book($this->xmlIterator->current());
-        $this->xmlIterator->next();
+        if ($this->xmlIterator->valid()) {
+            $book = new Book($this->xmlIterator->current());
+            $this->xmlIterator->next();
 
-        return $book;
+            return $book;
+        }
+        return 0;
     }
 
     private function getContent()
@@ -41,11 +44,12 @@ class BookRepository
 
     public function apply()
     {
-        for ($i=0; $i < $this->count; $i++)
-        {
-            $book = $this->fetchNext();
-            $book->getObject();
-            $book->apply();
+        if ($this->xmlIterator->valid()) {
+            for ($i = 0; $i < $this->count; $i++) {
+                $book = $this->fetchNext();
+                $book->getObject();
+                $book->apply();
+            }
         }
 
     }
@@ -53,32 +57,13 @@ class BookRepository
 
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
+
+$book = $booksRepo->fetchNext();
+$book->getObject();
+$book->apply();
+
+$book = $booksRepo->fetchNext();
+$book->getObject();
+$book->apply();
+
 $booksRepo->apply();
-//$book = $booksRepo->fetchNext();
-//$book->getObject();
-//$book->apply();
-
-//$book = $booksRepo->fetchNext();
-//$book->getObject();
-//$book->apply();
-
-//$booksRepo->push($PDO);
-
-//$sth = $PDO->prepare("SELECT id, title FROM book WHERE id = '10'");
-//$sth->execute();
-//$test = $sth->fetch();
-//var_dump($test['title']);
-
-
-//$book = $booksRepo->fetchNext();
-//$book1 = $booksRepo->fetchNext();
-//
-//echo $book->bid;
-
-
-
-
-
-
-
-

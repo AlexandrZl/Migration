@@ -15,7 +15,6 @@ require_once(realpath(dirname(__FILE__) . '/..') . '/App/PrimaryField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/iFields.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/MappedSQL.php');
 
-$PDO = require_once(realpath(dirname(__FILE__) . '/..') . '/autoload/database.php');
 
 class XmlRepositoryTest extends PHPUnit_Framework_TestCase {
 
@@ -41,13 +40,13 @@ EOL;
 
         global $CONFIG;
 
-        $dsn = "mysql:dbname={$CONFIG['db_name']};host={$CONFIG['db_host']}";
+        $dsn = "mysql:dbname={$CONFIG['db_test']};host={$CONFIG['db_host']}";
         $pdo = new PDO($dsn, $CONFIG['db_user'], $CONFIG['db_pass'], array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
         ));
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $sql ="CREATE TABLE IF NOT EXISTS `books` (
+        $sql ="CREATE TABLE IF NOT EXISTS `book` (
               `id` INT NOT NULL,
               `title` VARCHAR(45) NULL,
               `authors` VARCHAR(1000) NULL,
@@ -70,18 +69,17 @@ EOL;
         $this->assertEquals('Anna Karenina', $book2->title);
 
 //        $book_repository->apply();
-//
-//        $sql = $this->pdo->prepare("SELECT id, title FROM book WHERE id = '10'");
+//        $sql = $this->pdo->prepare("SELECT * FROM book WHERE id = '10'");
 //        $sql->execute();
 //        $row = $sql->fetch();
-//
 //        $this->assertEquals('War and peace', $row['title']);
+
     }
 
 
     public function tearDown() {
         unlink($this->dir."books.xml");
-        $this->pdo->exec("DROP TABLE books");
+        $this->pdo->exec("DROP TABLE book");
     }
 
 }

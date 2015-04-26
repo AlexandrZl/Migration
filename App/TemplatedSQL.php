@@ -6,9 +6,10 @@ class TemplatedSQL
     const INT = 'int(11)',
           VARCHAR = 'VARCHAR( 250 )';
 
-    public function __construct (PDO $pdo)
+    public function __construct ()
     {
-        $this->pdo = $pdo;
+        global $PDO;
+        $this->pdo = $PDO;
     }
 
     public function findByExternalId($id, $type)

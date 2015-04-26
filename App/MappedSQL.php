@@ -47,24 +47,21 @@ class MappedSQL implements iFields
 
     protected function findExternalId()
     {
-        global $PDO;
-        $sql = new TemplatedSQL($PDO);
+        $sql = new TemplatedSQL();
         return $sql->findByExternalId($this->md5, $this->entity);
 
     }
 
     protected function createInternalId()
     {
-        global $PDO;
-        $sql = new TemplatedSQL($PDO);
+        $sql = new TemplatedSQL();
         $result = $sql->newInternalId($this->object, $this->entity);
         return $result;
     }
 
     protected function createExternalId($id)
     {
-        global $PDO;
-        $sql = new TemplatedSQL($PDO);
+        $sql = new TemplatedSQL();
         $result = $sql->newExternalId($this->md5, $id, $this->entity);
         return $result;
     }
