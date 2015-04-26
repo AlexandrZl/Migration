@@ -14,22 +14,26 @@ class MappedSQL implements iFields
 
     public function apply()
     {
-
         foreach ($this->object as $field) {
             switch(true) {
                 case $field instanceof PrimaryField:
-                    $this->createExternalId($this->object);
-                    $this->findExternalId();
+                    $this->createMD5();
+                    if (!$this->findExternalId()) {
+                        $newInId = $this->createInternalId();
+                        if($newInId && $newInId['id']) {
+                            $this->createExternalId($newInId['id']);
+                        }
+                    }
                     break;
             }
         }
+        return $this->md5;
     }
 
-
-    protected function createExternalId($obj)
+    protected function createMD5()
     {
         $i = 0;
-        foreach ($obj as $key => $field) {
+        foreach ($this->object as $key => $field) {
             if($i > 1) break;
             switch(true) {
                 case $field instanceof StringField:
@@ -45,9 +49,26 @@ class MappedSQL implements iFields
     {
         global $PDO;
         $sql = new TemplatedSQL($PDO);
-        return $sql->findById($this->md5, $this->entity);
+        return $sql->findByExternalId($this->md5, $this->entity);
 
     }
+
+    protected function createInternalId()
+    {
+        global $PDO;
+        $sql = new TemplatedSQL($PDO);
+        $result = $sql->newInternalId($this->object, $this->entity);
+        return $result;
+    }
+
+    protected function createExternalId($id)
+    {
+        global $PDO;
+        $sql = new TemplatedSQL($PDO);
+        $result = $sql->newExternalId($this->md5, $id, $this->entity);
+        return $result;
+    }
+
 
 
 }

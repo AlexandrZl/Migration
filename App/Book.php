@@ -4,6 +4,7 @@ class Book
 {
     private $xml;
     private $map = array();
+    private $object = array();
 
     public function __construct (SimpleXMLElement $obj)
     {
@@ -11,7 +12,7 @@ class Book
         $this->map = array(
             'id' => new PrimaryField('id'),
             'title' => new StringField('title'),
-            'authors' => new ReferenceFieldMultiple('Author', 'authors'),
+            'authors' => new ReferenceFieldMultiple('author', 'authors'),
         );
     }
 
@@ -29,8 +30,15 @@ class Book
         foreach ($this->map as $key => $field) {
             $object[$key] = $field->value($this->xml);
         }
+        $this->object = $object;
 
         return $object;
 
+    }
+
+    public function apply()
+    {
+        $sqlObject = new MappedSQL($this->map, 'book');
+        return $sqlObject->apply();
     }
 }

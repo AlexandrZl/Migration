@@ -9,6 +9,7 @@ class BookRepository
     private $xmlParser;
     private $tagName;
     private $xmlIterator;
+    private $count;
 
     public function __construct ($path, $tagName)
     {
@@ -34,26 +35,32 @@ class BookRepository
         $this->xmlObj = $this->xmlObj->xpath($this->tagName);
 
         $this->xmlIterator = new ArrayIterator($this->xmlObj);
+        $this->count = $this->xmlIterator->count();
     }
+
 
     public function apply()
     {
+        for ($i=0; $i < $this->count; $i++)
+        {
+            $book = $this->fetchNext();
+            $book->getObject();
+            $book->apply();
+        }
 
-    }
-
-    public function push($pdo)
-    {
-
-//        $templatedSQL = new TemplatedSQL($pdo);
-
-//        $templatedSQL->execute($this->xmlObj, $this->tagName);
     }
 }
 
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
-$book = $booksRepo->fetchNext();
-$book->getObject();
+$booksRepo->apply();
+//$book = $booksRepo->fetchNext();
+//$book->getObject();
+//$book->apply();
+
+//$book = $booksRepo->fetchNext();
+//$book->getObject();
+//$book->apply();
 
 //$booksRepo->push($PDO);
 
