@@ -11,9 +11,23 @@ class Book
         $this->xml = $obj;
         $this->map = array(
             'id' => new PrimaryField('id'),
+            'date' => new DateField('date'),
             'title' => new StringField('title'),
+            'public' => new BoolField('public'),
             'authors' => new ReferenceFieldMultiple('author', 'authors'),
         );
+
+        $this->map['date']->setFields(array(
+            'day' => new NumericField('day'),
+            'month' => new NumericField('month'),
+            'year' => new NumericField('year'),
+        ));
+
+        $this->map['authors']->setFields(array(
+            'id' => new PrimaryField('id'),
+            'firstName' => new StringField('firstName'),
+            'lastName' => new StringField('lastName'),
+        ));
     }
 
     public function __get($table)

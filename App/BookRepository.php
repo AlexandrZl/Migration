@@ -58,12 +58,12 @@ class BookRepository
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
 
-$book = $booksRepo->fetchNext();
-$book->getObject();
-$book->apply();
-
-$book = $booksRepo->fetchNext();
-$book->getObject();
-$book->apply();
+//$book = $booksRepo->fetchNext();
+//$book->getObject();
+//$book->apply();
+//
+//$book = $booksRepo->fetchNext();
+//$book->getObject();
+//$book->apply();
 
 $booksRepo->apply();

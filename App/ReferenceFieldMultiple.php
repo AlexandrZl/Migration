@@ -11,12 +11,13 @@ class ReferenceFieldMultiple extends Fields
     {
         $this->reference = $reference;
         $this->entity = $entity;
+    }
 
-        $this->map = array(
-            'id' => new PrimaryField('id'),
-            'firstName' => new StringField('firstName'),
-            'lastName' => new StringField('lastName'),
-        );
+    public function setFields($fields)
+    {
+        foreach ($fields as $key => $field) {
+            $this->map[$key] = $field;
+        }
     }
 
     public function getEntity()
