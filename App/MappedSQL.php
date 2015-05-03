@@ -1,10 +1,11 @@
 <?php
-class MappedSQL implements iFields
+class MappedSQL
 {
     protected $object;
     protected $entity;
     protected $salt = "book";
     protected $md5;
+    private $added = 0;
 
     public function __construct ($obj, $entity)
     {
@@ -18,16 +19,25 @@ class MappedSQL implements iFields
             switch(true) {
                 case $field instanceof PrimaryField:
                     $this->createMD5();
-                    if (!$this->findExternalId()) {
+                    $extId = $this->findExternalId();
+                    if (!$extId) {
                         $newInId = $this->createInternalId();
-                        if($newInId && $newInId['id']) {
+                        if(isset($newInId) && isset($newInId['id'])) {
                             $this->createExternalId($newInId['id']);
+                            $this->added ++;
+                        } else {
+                            $this->createExternalId($newInId['existId']);
+                        }
+                    } else {
+                        $internalId = $this->findInternalId($extId['internalId'], $extId['type']);
+                        if (!$internalId) {
+                            $this->createInternalId($extId['internalId']);
                         }
                     }
                     break;
             }
         }
-        return $this->md5;
+        return $this->added;
     }
 
     protected function createMD5()
@@ -52,10 +62,16 @@ class MappedSQL implements iFields
 
     }
 
-    protected function createInternalId()
+    protected function findInternalId($id, $type)
     {
         $sql = new TemplatedSQL();
-        $result = $sql->newInternalId($this->object, $this->entity);
+        return $sql->findByInternalField('id', $id, $type);
+    }
+
+    protected function createInternalId($id = null)
+    {
+        $sql = new TemplatedSQL();
+        $result = $sql->newInternalId($this->object, $this->entity, $id);
         return $result;
     }
 
@@ -66,7 +82,10 @@ class MappedSQL implements iFields
         return $result;
     }
 
-
-
+    public static function createMap()
+    {
+        $sqlObj = new TemplatedSQL();
+        $sqlObj->createMap();
+    }
 }
 ?>

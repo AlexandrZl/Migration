@@ -12,8 +12,12 @@ require_once(realpath(dirname(__FILE__) . '/..') . '/App/Fields.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/ReferenceFieldMultiple.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/StringField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/PrimaryField.php');
-require_once(realpath(dirname(__FILE__) . '/..') . '/App/iFields.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/MappedSQL.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/DateField.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/BoolField.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/NumericField.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/CLIMessage.php');
+
 
 
 class XmlRepositoryTest extends PHPUnit_Framework_TestCase {
@@ -40,16 +44,15 @@ EOL;
 
         global $CONFIG;
 
-        $dsn = "mysql:dbname={$CONFIG['db_test']};host={$CONFIG['db_host']}";
+        $dsn = "mysql:dbname={$CONFIG['db_name']};host={$CONFIG['db_host']}";
         $pdo = new PDO($dsn, $CONFIG['db_user'], $CONFIG['db_pass'], array(
             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'
         ));
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $sql ="CREATE TABLE IF NOT EXISTS `book` (
+        $sql ="CREATE TABLE IF NOT EXISTS `books` (
               `id` INT NOT NULL,
               `title` VARCHAR(45) NULL,
-              `authors` VARCHAR(1000) NULL,
               PRIMARY KEY (`id`));";
         $pdo->exec($sql);
 
@@ -57,7 +60,7 @@ EOL;
     }
 
     public function testBookReps() {
-        $book_repository = new BookRepository($this->dir . "books.xml", "book");
+        $book_repository = new BookRepository($this->dir . "books.xml", "books");
 
         $book1 = $book_repository->fetchNext();
         $book2 = $book_repository->fetchNext();
@@ -68,18 +71,18 @@ EOL;
         $this->assertEquals('11', $book2->id);
         $this->assertEquals('Anna Karenina', $book2->title);
 
-//        $book_repository->apply();
-//        $sql = $this->pdo->prepare("SELECT * FROM book WHERE id = '10'");
-//        $sql->execute();
-//        $row = $sql->fetch();
-//        $this->assertEquals('War and peace', $row['title']);
+        $book_repository->apply();
+        $sql = $this->pdo->prepare("SELECT * FROM book WHERE id = '10'");
+        $sql->execute();
+        $row = $sql->fetch();
+        $this->assertEquals('War and peace', $row['title']);
 
     }
 
 
     public function tearDown() {
         unlink($this->dir."books.xml");
-        $this->pdo->exec("DROP TABLE book");
+        $this->pdo->exec("DROP TABLE books");
     }
 
 }

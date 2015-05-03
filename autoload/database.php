@@ -14,7 +14,8 @@
         }
         catch(PDOException $e)
         {
-            echo "Connection failed: " . $e->getMessage();
+            CLIMessage::show("Connection failed: ".$e->getMessage(), "fail");
+            die;
         }
 
         return $pdo;
