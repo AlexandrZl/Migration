@@ -37,7 +37,10 @@ class MappedSQL
                     break;
             }
         }
-        return $this->added;
+        return array(
+            'id' => $this->md5,
+            'added' => $this->added,
+        );
     }
 
     protected function createMD5()

@@ -42,7 +42,7 @@ class ReferenceFieldMultiple extends Fields
                 foreach ($this->map as $key => $field) {
                     $objects[$i][$key] = $field->value($child);
                 }
-                $id[] = $this->mappedDb($this->map, $this->entity);
+                $id[] = $this->mappedDb($this->map, $this->entity)['id'];
                 $i++;
             }
         }

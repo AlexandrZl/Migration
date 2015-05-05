@@ -50,7 +50,7 @@ class BookRepository
             for ($i = 0; $i < $this->count; $i++) {
                 $book = $this->fetchNext();
                 $book->getObject();
-                $status = $book->apply();
+                $status = $book->apply()['added'];
                 $this->added += $status;
             }
         }
