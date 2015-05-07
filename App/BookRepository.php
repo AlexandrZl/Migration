@@ -10,7 +10,6 @@ class BookRepository
     private $tagName;
     private $xmlIterator;
     private $count;
-    private $added = 0;
 
     public function __construct ($path, $tagName)
     {
@@ -18,7 +17,6 @@ class BookRepository
         $this->tagName = $tagName;
         $this->xmlParser = new XMLParser();
         $this->getContent();
-        MappedSQL::createMap();
     }
 
     public function fetchNext()
@@ -50,17 +48,18 @@ class BookRepository
             for ($i = 0; $i < $this->count; $i++) {
                 $book = $this->fetchNext();
                 $book->getObject();
-                $status = $book->apply()['added'];
-                $this->added += $status;
+                $status = $book->apply();
             }
         }
-        CLIMessage::show("Inserted $this->added sets", "success");
-        CLIMessage::show("Missed ".($this->count - $this->added)." sets", "success");
         CLIMessage::show("Success!", "success");
     }
 }
 
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
+
+//$book = $booksRepo->fetchNext();
+//$book->getObject();
+//$book->apply();
 
 $booksRepo->apply();

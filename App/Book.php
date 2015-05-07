@@ -11,17 +11,13 @@ class Book
         $this->xml = $obj;
         $this->map = array(
             'id' => new PrimaryField('id'),
-            'date' => new DateField('date'),
+            'date' => new AggregateField('date'),
             'title' => new StringField('title'),
             'public' => new BoolField('public'),
-            'authors' => new ReferenceFieldMultiple('author', 'authors'),
+            'authors' => new ReferenceFieldMultiple('author', 'authors', 'book'),
         );
 
-        $this->map['date']->setFields(array(
-            'day' => new NumericField('day'),
-            'month' => new NumericField('month'),
-            'year' => new NumericField('year'),
-        ));
+        $this->map['date']->setSeparator('/');
 
         $this->map['authors']->setFields(array(
             'id' => new PrimaryField('id'),
@@ -50,9 +46,17 @@ class Book
 
     }
 
-    public function apply()
+    public function apply($entity = null)
     {
-        $sqlObject = new MappedSQL($this->map, 'book');
-        return $sqlObject->apply();
+        if ($entity) {
+            foreach ($this->map as $key => $field) {
+                if ($field instanceof ReferenceFieldMultiple && $field->getEntity() == $entity) {
+                    $object[$key] = $field->value($this->xml);
+                }
+            }
+        } else {
+            $sqlObject = new MappedSQL($this->map, 'book');
+            return $sqlObject->apply();
+        }
     }
 }

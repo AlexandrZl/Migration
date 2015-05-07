@@ -1,14 +1,12 @@
 <?php
 
-class DateField extends Fields
+class AggregateField extends Fields
 {
-    private $map = array();
+    private $separator;
 
-    public function setFields($fields)
+    public function setSeparator($mark)
     {
-        foreach ($fields as $key => $field) {
-            $this->map[$key] = $field;
-        }
+        $this->separator = $mark;
     }
 
     protected function getValuePath()
@@ -17,8 +15,8 @@ class DateField extends Fields
         $date = '';
 
         foreach ($xml as $object) {
-            foreach ($this->map as $key => $field) {
-                $date .= $field->value($object)."/";
+            foreach ($object as $field) {
+                $date .= $field.$this->separator;
             }
         }
         $date = substr($date, 0, -1);

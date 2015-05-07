@@ -13,7 +13,7 @@ require_once(realpath(dirname(__FILE__) . '/..') . '/App/ReferenceFieldMultiple.
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/StringField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/PrimaryField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/MappedSQL.php');
-require_once(realpath(dirname(__FILE__) . '/..') . '/App/DateField.php');
+require_once(realpath(dirname(__FILE__) . '/..') . '/App/AggregateField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/BoolField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/NumericField.php');
 require_once(realpath(dirname(__FILE__) . '/..') . '/App/CLIMessage.php');

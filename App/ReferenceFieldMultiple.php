@@ -4,13 +4,20 @@ class ReferenceFieldMultiple extends Fields
 {
     private $reference;
     private $entity;
+    private $entities;
     private $map = array();
     private $ids;
+    private $created_entity = false;
 
-    public function __construct ($entity, $reference)
+    public function __construct ($entity, $entities, $reference)
     {
         $this->reference = $reference;
+        $this->entities = $entities;
         $this->entity = $entity;
+        $this->created_entity = MappedSQL::createMap($entity, $reference);
+        if (!$this->created_entity) {
+            $this->created_entity = $reference."_".$entity;
+        }
     }
 
     public function setFields($fields)
@@ -25,14 +32,19 @@ class ReferenceFieldMultiple extends Fields
         return $this->entity;
     }
 
-    public function getReference()
+    public function getCreatedEntity()
     {
-        return $this->reference;
+        return $this->created_entity;
+    }
+
+    public function getEntities()
+    {
+        return $this->entities;
     }
 
     protected function getValuePath()
     {
-        $xml = $this->xml->xpath($this->reference);
+        $xml = $this->xml->xpath($this->entities);
         $objects = array();
         $i = 0;
         $id = array();
@@ -41,8 +53,11 @@ class ReferenceFieldMultiple extends Fields
             foreach ($object as $child) {
                 foreach ($this->map as $key => $field) {
                     $objects[$i][$key] = $field->value($child);
+                    if ($field instanceof PrimaryField) {
+                        $id[] = $field->fieldValue;
+                    }
                 }
-                $id[] = $this->mappedDb($this->map, $this->entity)['id'];
+                $this->mappedDb($this->map, $this->entity);
                 $i++;
             }
         }

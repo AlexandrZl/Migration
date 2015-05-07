@@ -3,9 +3,7 @@ class MappedSQL
 {
     protected $object;
     protected $entity;
-    protected $salt = "book";
-    protected $md5;
-    private $added = 0;
+    private $id;
 
     public function __construct ($obj, $entity)
     {
@@ -18,57 +16,23 @@ class MappedSQL
         foreach ($this->object as $field) {
             switch(true) {
                 case $field instanceof PrimaryField:
-                    $this->createMD5();
-                    $extId = $this->findExternalId();
-                    if (!$extId) {
-                        $newInId = $this->createInternalId();
-                        if(isset($newInId) && isset($newInId['id'])) {
-                            $this->createExternalId($newInId['id']);
-                            $this->added ++;
-                        } else {
-                            $this->createExternalId($newInId['existId']);
-                        }
-                    } else {
-                        $internalId = $this->findInternalId($extId['internalId'], $extId['type']);
-                        if (!$internalId) {
-                            $this->createInternalId($extId['internalId']);
-                        }
+                    $this->id = $this->createInternalId();
+                    break;
+                case $field instanceof ReferenceFieldMultiple:
+                    if (!$this->findExternalId($field)) {
+                        $this->createExternalId($field);
                     }
                     break;
             }
         }
-        return array(
-            'id' => $this->md5,
-            'added' => $this->added,
-        );
+        return $this->id;
     }
 
-    protected function createMD5()
-    {
-        $i = 0;
-        foreach ($this->object as $key => $field) {
-            if($i > 1) break;
-            switch(true) {
-                case $field instanceof StringField:
-                    $this->md5 .= $field->getValue();
-                    $i++;
-                    break;
-            }
-        }
-        $this->md5 = md5($this->md5.$this->salt);
-    }
-
-    protected function findExternalId()
+    protected function findExternalId($field)
     {
         $sql = new TemplatedSQL();
-        return $sql->findByExternalId($this->md5, $this->entity);
+        return $sql->findByExternalId($field, $this->id['id']);
 
-    }
-
-    protected function findInternalId($id, $type)
-    {
-        $sql = new TemplatedSQL();
-        return $sql->findByInternalField('id', $id, $type);
     }
 
     protected function createInternalId($id = null)
@@ -78,17 +42,17 @@ class MappedSQL
         return $result;
     }
 
-    protected function createExternalId($id)
+    protected function createExternalId($field)
     {
         $sql = new TemplatedSQL();
-        $result = $sql->newExternalId($this->md5, $id, $this->entity);
+        $result = $sql->newExternalId($field, $this->id['id']);
         return $result;
     }
 
-    public static function createMap()
+    public static function createMap($entity, $reference)
     {
         $sqlObj = new TemplatedSQL();
-        $sqlObj->createMap();
+        return $sqlObj->createMap($entity, $reference);
     }
 }
 ?>

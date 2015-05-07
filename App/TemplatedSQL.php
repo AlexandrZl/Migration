@@ -9,33 +9,48 @@ class TemplatedSQL
         $this->pdo = $PDO;
     }
 
-    public function findByExternalId($id, $type)
+    public function findByExternalId($field, $id)
     {
+        $fields = explode("_", $field->getCreatedEntity());
+        $table = $field->getCreatedEntity();
+        foreach ($field->getIds() as $reference_id) {
+            $q = $this->pdo->prepare("SELECT * FROM $table WHERE $fields[0] = :id and $fields[1] = :reference_id limit 1");
+            $q->bindValue(':id', $id);
+            $q->bindValue(':reference_id', $reference_id);
+            $q->execute();
 
-        $q = $this->pdo->prepare("SELECT * FROM mappedDB WHERE externalId = :id and type = :type limit 1");
-        $q->bindValue(':id', $id);
-        $q->bindValue(':type', $type);
-        $q->execute();
-
-        $result = $q->fetch(PDO::FETCH_ASSOC);
-
-        return $result;
-    }
-
-    public function findByInternalField($nameField, $valueField, $table)
-    {
-        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $nameField = '$valueField' limit 1");
-        $q->execute();
-
-        try {
-            $result = $q->fetch(PDO::FETCH_ASSOC);
-        }
-        catch (Exception $e) {
-            $result = false;
+            try {
+                $q->execute();
+                $result = $q->fetch(PDO::FETCH_ASSOC);
+            }
+            catch (Exception $e) {
+                $result = false;
+            }
+            if($result) return $result;
         }
 
         return $result;
     }
+
+    public function newExternalId($field, $id)
+    {
+        $fields = explode("_", $field->getCreatedEntity());
+        $table = $field->getCreatedEntity();
+        foreach ($field->getIds() as $reference_id) {
+            $sql = "INSERT INTO $table ($fields[0], $fields[1]) VALUES ('$id', '$reference_id')";
+
+            try {
+                $this->pdo->exec($sql);
+                $result = true;
+            }
+            catch (Exception $e) {
+                $result = false;
+            }
+        }
+
+        return $result;
+    }
+
 
     public function newInternalId($obj, $entity, $id = null)
     {
@@ -53,7 +68,7 @@ class TemplatedSQL
                 }
             }
             if ($field instanceof ReferenceFieldMultiple) {
-                $sql .=$field->getReference() ;
+                continue;
             }
             $sql .= $field->getName().", ";
         }
@@ -63,13 +78,7 @@ class TemplatedSQL
 
         foreach ($obj as $field) {
             if ($field instanceof ReferenceFieldMultiple) {
-                $sql .="'";
-                $ids = $field->getIds();
-                foreach ($ids as $value) {
-                    $sql .=$value.",";
-                }
-                $sql = substr($sql, 0, -1);
-                $sql .="'  ";
+                continue;
             } else {
                 $sql .= "'".$field->getValue()."', ";
             }
@@ -85,37 +94,41 @@ class TemplatedSQL
             }
         }
         catch (Exception $e) {
-            $result['existId'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
+            $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
         }
         return $result;
     }
 
-    public function newExternalId($externalId, $internalId, $entity)
+    public function createMap($entity, $reference)
     {
-        $sql = "INSERT INTO mappedDB (externalId, internalId, type) VALUES ('$externalId', '$internalId', '$entity')";
+        $table = $reference."_".$entity;
+        try {
+            $sql ="CREATE table $table(
+             $reference INT( 11 ) NOT NULL,
+             $entity INT( 11 ) NOT NULL,
+             FOREIGN KEY (`$reference`) REFERENCES `$reference` (`id`),
+             FOREIGN KEY (`$entity`) REFERENCES `$entity` (`id`));";
+            $this->pdo->exec($sql);
+            CLIMessage::show("Created $table Table", "success");
+            return $table;
+        } catch(PDOException $e) {
+            return false;
+        }
+    }
+
+    public function findByInternalField($nameField, $valueField, $table)
+    {
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $nameField = '$valueField' limit 1");
+        $q->execute();
 
         try {
-            $this->pdo->exec($sql);
-            $result = true;
+            $result = $q->fetch(PDO::FETCH_ASSOC);
         }
         catch (Exception $e) {
             $result = false;
         }
-        return $result;
-    }
 
-    public function createMap()
-    {
-        $table = "mappedDB";
-        try {
-            $sql ="CREATE table $table(
-             externalId VARCHAR( 50 ) PRIMARY KEY NOT NULL,
-             internalId INT( 11 ) NOT NULL,
-             type VARCHAR( 50 ) NOT NULL);" ;
-            $this->pdo->exec($sql);
-            CLIMessage::show("Created $table Table", "success");
-        } catch(PDOException $e) {
-        }
+        return $result;
     }
 }
 ?>
