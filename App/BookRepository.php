@@ -10,6 +10,7 @@ class BookRepository
     private $tagName;
     private $xmlIterator;
     private $count;
+    private $manager;
 
     public function __construct ($path, $tagName)
     {
@@ -19,18 +20,8 @@ class BookRepository
         $this->getContent();
     }
 
-    public function fetchNext()
-    {
-        if ($this->xmlIterator->valid()) {
-            $book = new Book($this->xmlIterator->current());
-            $this->xmlIterator->next();
 
-            return $book;
-        }
-        return 0;
-    }
-
-    private function getContent()
+    public function getContent()
     {
         $path = $this->path;
 
@@ -39,27 +30,32 @@ class BookRepository
 
         $this->xmlIterator = new ArrayIterator($this->xmlObj);
         $this->count = $this->xmlIterator->count();
+        $this->manager = new Manager($this->xmlIterator, $this->path, $this->tagName);
     }
 
+    public function setClass($class, $name, $entity)
+    {
+        return $this->manager->setClass($class, $name, $entity);
+    }
 
     public function apply()
     {
-        if ($this->xmlIterator->valid()) {
-            for ($i = 0; $i < $this->count; $i++) {
-                $book = $this->fetchNext();
-                $book->getObject();
-                $status = $book->apply();
-            }
-        }
-        CLIMessage::show("Success!", "success");
+        return $this->manager->start();
     }
+
 }
 
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
+$booksRepo->setClass('Author', 'authors', 'author');
+$booksRepo->apply();
 
+//$booksRepo->newIterator('authors', 'author');
+//$book = $booksRepo->fetchNext('Author');
+//$book->getObject();
+//$book->apply();
+//
+//$booksRepo->newIterator();
 //$book = $booksRepo->fetchNext();
 //$book->getObject();
 //$book->apply();
-
-$booksRepo->apply();

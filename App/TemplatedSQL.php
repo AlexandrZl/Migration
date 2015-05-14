@@ -52,7 +52,7 @@ class TemplatedSQL
     }
 
 
-    public function newInternalId($obj, $entity, $id = null)
+    public function newInternalId($obj, $entity, $md5, $key)
     {
         $primField = array();
         $id = null;
@@ -61,23 +61,24 @@ class TemplatedSQL
 
         foreach ($obj as $field) {
             if ($field instanceof PrimaryField) {
-                if ($id && $field->getValue() == $id) {
-                    $primField[$field->getName()] = $id;
-                } else {
-                    $primField[$field->getName()] = $field->getValue();
-                }
-            }
-            if ($field instanceof ReferenceFieldMultiple) {
+                $primField[$field->getName()] = $md5;
+                $sql .= $key.", ";
+            } else if ($field instanceof ReferenceFieldMultiple) {
                 continue;
+            } else {
+                $sql .= $field->getName().", ";
             }
-            $sql .= $field->getName().", ";
+
         }
 
         $sql = substr($sql, 0, -2);
         $sql .= ") VALUES (";
 
         foreach ($obj as $field) {
-            if ($field instanceof ReferenceFieldMultiple) {
+            if ($field instanceof PrimaryField) {
+                $sql .= "'".$md5."', ";
+            }
+            else if ($field instanceof ReferenceFieldMultiple) {
                 continue;
             } else {
                 $sql .= "'".$field->getValue()."', ";
@@ -104,8 +105,8 @@ class TemplatedSQL
         $table = $reference."_".$entity;
         try {
             $sql ="CREATE table $table(
-             $reference INT( 11 ) NOT NULL,
-             $entity INT( 11 ) NOT NULL,
+             $reference VARCHAR ( 50 ) NOT NULL,
+             $entity VARCHAR ( 50 ) NOT NULL,
              FOREIGN KEY (`$reference`) REFERENCES `$reference` (`id`),
              FOREIGN KEY (`$entity`) REFERENCES `$entity` (`id`));";
             $this->pdo->exec($sql);
