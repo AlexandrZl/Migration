@@ -31,14 +31,14 @@ class Manager
     }
 
     public function start() {
-        $this->newIterator();
-        $this->apply();
         if ($this->classes) {
             foreach ($this->classes as $class) {
                 $this->newIterator($class['name'], $class['entity']);
                 $this->apply($class['class']);
             }
         }
+        $this->newIterator();
+        $this->apply();
     }
 
     private function apply($class = null)
@@ -47,6 +47,7 @@ class Manager
             $book = $this->fetchNext($class);
             $book->getObject();
             $book->apply();
+            $book->applyEntity();
         }
     }
 

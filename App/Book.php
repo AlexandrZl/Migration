@@ -21,4 +21,10 @@ class Book extends Table
         $sqlObject = new MappedSQL($this->map, 'book');
         return $sqlObject->apply();
     }
+
+    public function applyEntity()
+    {
+        $sqlObject = new MappedSQL($this->map, 'book');
+        return $sqlObject->applyEntity();
+    }
 }

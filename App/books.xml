@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <books>
-    <book id="1">
+    <book>
         <title>White Fang</title>
         <date>
             <day>01</day>
@@ -9,17 +9,17 @@
         </date>
         <public>true</public>
         <authors>
-            <author id="1">
+            <author>
                 <firstName>Jack</firstName>
                 <lastName>London</lastName>
             </author>
-            <author id="2">
+            <author>
                 <firstName>Ernest</firstName>
                 <lastName>Hemingway</lastName>
             </author>
         </authors>
     </book>
-    <book id="2">
+    <book>
         <title>For Whom the Bell Tolls</title>
         <date>
             <day>10</day>
@@ -28,7 +28,7 @@
         </date>
         <public>false</public>
         <authors>
-            <author id="2">
+            <author>
                 <firstName>Ernest</firstName>
                 <lastName>Hemingway</lastName>
             </author>

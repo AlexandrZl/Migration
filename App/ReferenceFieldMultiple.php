@@ -6,6 +6,7 @@ class ReferenceFieldMultiple extends Fields
     private $entity;
     private $entities;
     private $created_entity = false;
+    private $objects;
 
     public function __construct ($entity, $entities, $reference)
     {
@@ -33,6 +34,11 @@ class ReferenceFieldMultiple extends Fields
         return $this->entities;
     }
 
+    public function getObjects()
+    {
+        return $this->objects;
+    }
+
     protected function getValuePath()
     {
         $xml = $this->xml->xpath($this->entities);
@@ -42,6 +48,7 @@ class ReferenceFieldMultiple extends Fields
                 $objects[] = $child;
             }
         }
+        $this->objects = $objects;
 
         return $objects;
     }

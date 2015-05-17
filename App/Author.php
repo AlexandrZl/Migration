@@ -6,7 +6,7 @@ class Author extends Table
     {
         $this->xml = $obj;
         $this->map = array(
-            'id' => new PrimaryField('id'),
+            'id' => new PrimaryField('firstName'),
             'firstName' => new StringField('firstName'),
             'lastName' => new StringField('lastName'),
         );
@@ -16,5 +16,11 @@ class Author extends Table
     {
         $sqlObject = new MappedSQL($this->map, 'author');
         return $sqlObject->apply();
+    }
+
+    public function applyEntity()
+    {
+//        $sqlObject = new MappedSQL($this->map, 'book');
+//        return $sqlObject->applyEntity();
     }
 }

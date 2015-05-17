@@ -9,28 +9,72 @@ class TemplatedSQL
         $this->pdo = $PDO;
     }
 
-    public function findByExternalId($field, $id)
+    public function findByExternalId($id, $nameField, $table)
     {
-        $fields = explode("_", $field->getCreatedEntity());
-        $table = $field->getCreatedEntity();
-        foreach ($field->getIds() as $reference_id) {
-            $q = $this->pdo->prepare("SELECT * FROM $table WHERE $fields[0] = :id and $fields[1] = :reference_id limit 1");
-            $q->bindValue(':id', $id);
-            $q->bindValue(':reference_id', $reference_id);
-            $q->execute();
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $nameField = :id limit 1");
+        $q->bindValue(':id', $id);
+        $q->execute();
 
-            try {
-                $q->execute();
-                $result = $q->fetch(PDO::FETCH_ASSOC);
-            }
-            catch (Exception $e) {
-                $result = false;
-            }
-            if($result) return $result;
+        try {
+            $q->execute();
+            $result = $q->fetch(PDO::FETCH_ASSOC);
+        }
+        catch (Exception $e) {
+            $result = false;
         }
 
         return $result;
     }
+
+    public function findEntityId($table, $field, $referField, $id, $referId)
+    {
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $field = :id AND $referField = :referId limit 1");
+        $q->bindValue(':id', $id);
+        $q->bindValue(':referId', $referId);
+        $q->execute();
+
+        try {
+            $q->execute();
+            $result = $q->fetch(PDO::FETCH_ASSOC);
+        }
+        catch (Exception $e) {
+            $result = false;
+        }
+
+        return $result;
+    }
+
+    public function createEntityId($table, $field, $referField, $id, $referId)
+    {
+        $sql = "INSERT INTO $table ($field, $referField) VALUES ('$id', '$referId')";
+
+        try {
+            $this->pdo->exec($sql);
+            $result = true;
+        }
+        catch (Exception $e) {
+            $result = false;
+        }
+        return $result;
+    }
+
+    public function findByReferenceId($id, $table)
+    {
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE id = :id limit 1");
+        $q->bindValue(':id', $id);
+        $q->execute();
+
+        try {
+            $q->execute();
+            $result = $q->fetch(PDO::FETCH_ASSOC);
+        }
+        catch (Exception $e) {
+            $result = false;
+        }
+
+        return $result;
+    }
+
 
     public function newExternalId($field, $id)
     {
