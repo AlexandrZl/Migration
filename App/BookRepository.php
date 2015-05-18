@@ -43,19 +43,37 @@ class BookRepository
         return $this->manager->start();
     }
 
+    public function newIterator($names = null, $name = null)
+    {
+        return $this->manager->newIterator($names, $name);
+    }
+
+    public function fetchNext($class = null)
+    {
+        return $this->manager->fetchNext($class);
+    }
+
+    public function applyByClass($class)
+    {
+        return $this->manager->applyByClass($class);
+    }
 }
 
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
 $booksRepo->setClass('Author', 'authors', 'author');
+//$booksRepo->applyByClass('Author');
 $booksRepo->apply();
+
 
 //$booksRepo->newIterator('authors', 'author');
 //$book = $booksRepo->fetchNext('Author');
 //$book->getObject();
 //$book->apply();
-//
+//$book->applyEntity();
+
 //$booksRepo->newIterator();
 //$book = $booksRepo->fetchNext();
 //$book->getObject();
 //$book->apply();
+//$book->applyEntity();

@@ -13,10 +13,6 @@
                 <firstName>Jack</firstName>
                 <lastName>London</lastName>
             </author>
-            <author>
-                <firstName>Ernest</firstName>
-                <lastName>Hemingway</lastName>
-            </author>
         </authors>
     </book>
     <book>

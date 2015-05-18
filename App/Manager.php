@@ -6,6 +6,8 @@ class Manager
     private $obj;
     private $i = 0;
     private $xmlIterator;
+    private $entityIterator;
+    private $entityCount = 0;
     private $xmlParser;
     private $path;
     private $tagName;
@@ -35,10 +37,40 @@ class Manager
             foreach ($this->classes as $class) {
                 $this->newIterator($class['name'], $class['entity']);
                 $this->apply($class['class']);
+                for ($i = 1; $i < $this->entityCount; $i++) {
+                    $this->entityIterator->next();
+                    $xmlObj = $this->entityIterator->current()->$class['name']->xpath($class['entity']);
+                    $this->xmlIterator = new ArrayIterator($xmlObj);
+                    $this->count = $this->xmlIterator->count();
+                    $this->apply($class['class']);
+                }
             }
         }
         $this->newIterator();
         $this->apply();
+    }
+
+    public function applyByClass($byClass)
+    {
+        $findClass = false;
+        foreach ($this->classes as $class) {
+            if ($class['class'] == $byClass) {
+                $findClass = true;
+                $this->newIterator($class['name'], $class['entity']);
+                $this->apply($class['class']);
+                for ($i = 1; $i < $this->entityCount; $i++) {
+                    $this->entityIterator->next();
+                    $xmlObj = $this->entityIterator->current()->$class['name']->xpath($class['entity']);
+                    $this->xmlIterator = new ArrayIterator($xmlObj);
+                    $this->count = $this->xmlIterator->count();
+                    $this->apply($class['class']);
+                }
+            }
+        }
+        if (!$findClass) {
+            $this->newIterator();
+            $this->apply();
+        }
     }
 
     private function apply($class = null)
@@ -65,13 +97,14 @@ class Manager
 
     public function newIterator($names = null, $name = null)
     {
-        $this->xmlObj = $this->xmlParser->parseFile($this->path);
-        $this->xmlObj = $this->xmlObj->xpath($this->tagName);
+        $xmlObj = $this->xmlParser->parseFile($this->path);
+        $xmlObj = $xmlObj->xpath($this->tagName);
         if ($names && $name) {
-            $this->xmlIterator = new ArrayIterator($this->xmlObj);
-            $this->xmlObj = $this->xmlIterator->current()->$names->xpath($name);
+            $this->entityIterator = new ArrayIterator($xmlObj);
+            $this->entityCount = $this->entityIterator->count();
+            $xmlObj = $this->entityIterator->current()->$names->xpath($name);
         }
-        $this->xmlIterator = new ArrayIterator($this->xmlObj);
+        $this->xmlIterator = new ArrayIterator($xmlObj);
         $this->count = $this->xmlIterator->count();
     }
 
