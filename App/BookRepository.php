@@ -62,15 +62,15 @@ class BookRepository
 global $PDO;
 $booksRepo = new BookRepository("books.xml", 'book');
 $booksRepo->setClass('Author', 'authors', 'author');
-//$booksRepo->applyByClass('Author');
+$booksRepo->applyByClass('Author');
+
 $booksRepo->apply();
 
-
 //$booksRepo->newIterator('authors', 'author');
-//$book = $booksRepo->fetchNext('Author');
-//$book->getObject();
-//$book->apply();
-//$book->applyEntity();
+//$author = $booksRepo->fetchNext('Author');
+//$author->getObject();
+//$author->apply();
+//$author->applyEntity();
 
 //$booksRepo->newIterator();
 //$book = $booksRepo->fetchNext();
