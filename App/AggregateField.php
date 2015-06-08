@@ -11,7 +11,7 @@ class AggregateField extends Fields
 
     protected function getValuePath()
     {
-        $xml = $this->xml->xpath($this->getName());
+        $xml = $this->xmlObj->xpath($this->getName());
         $date = '';
 
         foreach ($xml as $object) {

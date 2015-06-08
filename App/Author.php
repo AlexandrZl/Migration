@@ -2,9 +2,10 @@
 
 class Author extends Table
 {
-    public function __construct (SimpleXMLElement $obj)
+    public function __construct (SimpleXMLElement $obj, $name)
     {
-        $this->xml = $obj;
+        $this->xmlObj = $obj;
+        $this->entity = $name;
         $this->map = array(
             'id' => new PrimaryField('firstName'),
             'firstName' => new StringField('firstName'),
@@ -12,15 +13,4 @@ class Author extends Table
         );
     }
 
-    public function apply()
-    {
-        $sqlObject = new MappedSQL($this->map, 'author');
-        return $sqlObject->apply();
-    }
-
-    public function applyEntity()
-    {
-//        $sqlObject = new MappedSQL($this->map, 'book');
-//        return $sqlObject->applyEntity();
-    }
 }

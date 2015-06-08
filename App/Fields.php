@@ -2,7 +2,7 @@
 abstract class Fields
 {
     abstract protected function getValuePath();
-    protected $xml;
+    protected $xmlObj;
     protected $fieldName;
     protected $fieldValue;
 
@@ -21,9 +21,9 @@ abstract class Fields
         return $this->fieldValue;
     }
 
-    public function value($xml)
+    public function value($obj)
     {
-        $this->xml = $xml;
+        $this->xmlObj = $obj;
         return $this->getValuePath();
     }
 }

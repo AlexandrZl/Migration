@@ -8,12 +8,10 @@
             <year>1913</year>
         </date>
         <public>true</public>
-        <authors>
-            <author>
-                <firstName>Jack</firstName>
-                <lastName>London</lastName>
-            </author>
-        </authors>
+        <author>
+            <firstName>Jack</firstName>
+            <lastName>London</lastName>
+        </author>
     </book>
     <book>
         <title>For Whom the Bell Tolls</title>
@@ -23,11 +21,9 @@
             <year>1910</year>
         </date>
         <public>false</public>
-        <authors>
-            <author>
-                <firstName>Ernest</firstName>
-                <lastName>Hemingway</lastName>
-            </author>
-        </authors>
+        <author>
+            <firstName>Ernest</firstName>
+            <lastName>Hemingway</lastName>
+        </author>
     </book>
 </books>

@@ -9,9 +9,11 @@ class TemplatedSQL
         $this->pdo = $PDO;
     }
 
-    public function findByExternalId($id, $nameField, $table)
+    public function findByExternalId($id, $nameField)
     {
-        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $nameField = :id limit 1");
+        $table = 'entity_'.$nameField;
+
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE `externalId` = :id limit 1");
         $q->bindValue(':id', $id);
         $q->execute();
 
@@ -26,27 +28,25 @@ class TemplatedSQL
         return $result;
     }
 
-    public function findEntityId($table, $field, $referField, $id, $referId)
+    public function createEntity($name)
     {
-        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $field = :id AND $referField = :referId limit 1");
-        $q->bindValue(':id', $id);
-        $q->bindValue(':referId', $referId);
-        $q->execute();
-
+        $table = 'entity_'.$name;
         try {
-            $q->execute();
-            $result = $q->fetch(PDO::FETCH_ASSOC);
+            $sql ="CREATE table $table(
+             `externalId` VARCHAR ( 50 ) NOT NULL);";
+            $this->pdo->exec($sql);
+            CLIMessage::show("Created $name Table", "success");
+            return $name;
+        } catch(PDOException $e) {
+            return false;
         }
-        catch (Exception $e) {
-            $result = false;
-        }
-
-        return $result;
     }
 
-    public function createEntityId($table, $field, $referField, $id, $referId)
+    public function newExternalId($id, $nameField)
     {
-        $sql = "INSERT INTO $table ($field, $referField) VALUES ('$id', '$referId')";
+        $table = 'entity_'.$nameField;
+
+        $sql = "INSERT INTO $table (`externalId`) VALUES ('$id')";
 
         try {
             $this->pdo->exec($sql);
@@ -55,62 +55,23 @@ class TemplatedSQL
         catch (Exception $e) {
             $result = false;
         }
-        return $result;
-    }
-
-    public function findByReferenceId($id, $table)
-    {
-        $q = $this->pdo->prepare("SELECT * FROM $table WHERE id = :id limit 1");
-        $q->bindValue(':id', $id);
-        $q->execute();
-
-        try {
-            $q->execute();
-            $result = $q->fetch(PDO::FETCH_ASSOC);
-        }
-        catch (Exception $e) {
-            $result = false;
-        }
 
         return $result;
     }
 
-
-    public function newExternalId($field, $id)
+    public function newInternalId($obj, $entity)
     {
-        $fields = explode("_", $field->getCreatedEntity());
-        $table = $field->getCreatedEntity();
-        foreach ($field->getIds() as $reference_id) {
-            $sql = "INSERT INTO $table ($fields[0], $fields[1]) VALUES ('$id', '$reference_id')";
-
-            try {
-                $this->pdo->exec($sql);
-                $result = true;
-            }
-            catch (Exception $e) {
-                $result = false;
-            }
-        }
-
-        return $result;
-    }
-
-
-    public function newInternalId($obj, $entity, $md5, $key)
-    {
-        $primField = array();
-        $id = null;
-
         $sql = "INSERT INTO $entity (";
+        $fields = array();
 
-        foreach ($obj as $field) {
+        foreach ($obj as $key => $field) {
             if ($field instanceof PrimaryField) {
-                $primField[$field->getName()] = $md5;
                 $sql .= $key.", ";
-            } else if ($field instanceof ReferenceFieldMultiple) {
-                continue;
+            } else if ($field instanceof ReferenceField) {
+                $sql .= $field->getName().", ";
             } else {
                 $sql .= $field->getName().", ";
+                $fields[$field->getName()] = $field->getValue();
             }
 
         }
@@ -120,10 +81,10 @@ class TemplatedSQL
 
         foreach ($obj as $field) {
             if ($field instanceof PrimaryField) {
-                $sql .= "'".$md5."', ";
+                $sql .= "null, ";
             }
             else if ($field instanceof ReferenceFieldMultiple) {
-                continue;
+                $sql .= $field->getValue().", ";
             } else {
                 $sql .= "'".$field->getValue()."', ";
             }
@@ -133,10 +94,7 @@ class TemplatedSQL
 
         try {
             $this->pdo->exec($sql);
-            foreach ($primField as $key => $value) {
-                $result = $this->findByInternalField($key, $value, $entity);
-                break;
-            }
+            $result = $this->findByInternalField($fields, $entity);
         }
         catch (Exception $e) {
             $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
@@ -144,30 +102,25 @@ class TemplatedSQL
         return $result;
     }
 
-    public function createMap($entity, $reference)
+    public function findByInternalField($fields, $entity)
     {
-        $table = $reference."_".$entity;
-        try {
-            $sql ="CREATE table $table(
-             $reference VARCHAR ( 50 ) NOT NULL,
-             $entity VARCHAR ( 50 ) NOT NULL,
-             FOREIGN KEY (`$reference`) REFERENCES `$reference` (`id`),
-             FOREIGN KEY (`$entity`) REFERENCES `$entity` (`id`));";
-            $this->pdo->exec($sql);
-            CLIMessage::show("Created $table Table", "success");
-            return $table;
-        } catch(PDOException $e) {
-            return false;
+        $sql = "SELECT * FROM $entity WHERE ";
+
+        foreach ($fields as $key => $value) {
+            $sql .= $key." = ".":".$key." AND ";
         }
-    }
+        $sql = substr($sql, 0, -5);
+        $sql .= " limit 1";
 
-    public function findByInternalField($nameField, $valueField, $table)
-    {
-        $q = $this->pdo->prepare("SELECT * FROM $table WHERE $nameField = '$valueField' limit 1");
-        $q->execute();
+        $q = $this->pdo->prepare($sql);
+
+        foreach ($fields as $key => $value) {
+            $q->bindValue(':'.$key, $value);
+        }
 
         try {
-            $result = $q->fetch(PDO::FETCH_ASSOC);
+            $q->execute();
+            $result = $q->fetchAll(PDO::FETCH_ASSOC)[0]['id'];
         }
         catch (Exception $e) {
             $result = false;
@@ -175,5 +128,6 @@ class TemplatedSQL
 
         return $result;
     }
+
 }
 ?>

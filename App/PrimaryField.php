@@ -7,8 +7,8 @@ class PrimaryField extends Fields
     {
         $result = null;
 
-        if ($this->xml) {
-            $attr = $this->xml->attributes();
+        if ($this->xmlObj) {
+            $attr = $this->xmlObj->attributes();
 
             if ($attr) {
                 foreach ($attr as $child => $value) {
@@ -20,10 +20,11 @@ class PrimaryField extends Fields
             }
 
             if (empty($result)) {
-                $result = $this->xml->xpath($this->fieldName);
+                $result = $this->xmlObj->xpath($this->fieldName);
                 $result = $result ? $result[0] : null;
             }
         }
+
 
         $this->fieldValue = $result;
 
