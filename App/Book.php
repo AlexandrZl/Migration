@@ -14,17 +14,8 @@ class Book extends Table
         );
 
         $this->map['date']->setSeparator('/');
+        $this->table = 'book';
     }
 
-    public function apply()
-    {
-        $sqlObject = new MappedSQL($this->map, 'book');
-        return $sqlObject->apply();
-    }
 
-    public function applyEntity()
-    {
-        $sqlObject = new MappedSQL($this->map, 'book');
-        return $sqlObject->applyEntity();
-    }
 }

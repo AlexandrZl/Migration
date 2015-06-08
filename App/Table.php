@@ -5,6 +5,7 @@ abstract class Table
     protected $xml;
     protected $map = array();
     protected $object = array();
+    protected $table = null;
 
     public function __get($table)
     {
@@ -23,6 +24,18 @@ abstract class Table
         $this->object = $object;
 
         return $object;
+    }
+
+    public function apply()
+    {
+        $sqlObject = new MappedSQL($this->map, $this->table);
+        return $sqlObject->apply();
+    }
+
+    public function applyEntity()
+    {
+        $sqlObject = new MappedSQL($this->map, $this->table);
+        return $sqlObject->applyEntity();
     }
 
 }
