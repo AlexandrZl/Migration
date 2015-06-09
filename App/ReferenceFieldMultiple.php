@@ -2,54 +2,29 @@
 
 class ReferenceFieldMultiple extends Fields
 {
-    private $reference;
-    private $entity;
-    private $entities;
-    private $created_entity = false;
-    private $objects;
+    private $class;
+    private $name;
 
-    public function __construct ($entity, $entities, $reference)
+    public function __construct ($class, $name, $entity)
     {
-        $this->reference = $reference;
-        $this->entities = $entities;
-        $this->entity = $entity;
-        $this->created_entity = MappedSQL::createMap($entity, $reference);
-        if (!$this->created_entity) {
-            $this->created_entity = $reference."_".$entity;
-        }
-    }
-
-    public function getEntity()
-    {
-        return $this->entity;
-    }
-
-    public function getCreatedEntity()
-    {
-        return $this->created_entity;
-    }
-
-    public function getEntities()
-    {
-        return $this->entities;
-    }
-
-    public function getObjects()
-    {
-        return $this->objects;
+        $this->class = $class;
+        $this->name = $name;
+        $sqlObj = new TemplatedSQL();
+        $sqlObj->createEntityRef($name, $entity);
     }
 
     protected function getValuePath()
     {
-        $xml = $this->xml->xpath($this->entities);
-        $objects = array();
-        foreach ($xml as $object) {
-            foreach ($object as $child) {
-                $objects[] = $child;
-            }
-        }
-        $this->objects = $objects;
+        $obj = $this->xmlObj->xpath('.//'.$this->name);
 
-        return $objects;
+        $repository = new Repository($this->class, $this->name, $obj);
+        $repository->start();
+
+        $ids = $repository->getValues();
+
+        $this->fieldName = $this->name;
+        $this->fieldValue = $ids;
+
+        return $ids;
     }
 }

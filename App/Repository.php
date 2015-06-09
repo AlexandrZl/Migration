@@ -8,6 +8,7 @@ class Repository
     private $obj;
     private $iterator;
     private $iteratorCount;
+    private $values = array();
 
     public function __construct($class, $name, $obj)
     {
@@ -28,7 +29,7 @@ class Repository
     {
         for ($i = 0; $i < $this->iteratorCount; $i++) {
             $repositoryItem = new $this->class($this->iterator->current(), $this->name);
-            $repositoryItem->apply();
+            $this->values[] = $repositoryItem->apply();
             $this->iterator->next();
         }
     }
@@ -37,6 +38,11 @@ class Repository
     {
         $this->iterator = new ArrayIterator($this->obj);
         $this->iteratorCount = $this->iterator->count();
+    }
+
+    public function getValues()
+    {
+        return $this->values;
     }
 
 }

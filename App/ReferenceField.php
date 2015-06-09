@@ -15,7 +15,6 @@ class ReferenceField extends Fields
 
     protected function getValuePath()
     {
-
         $obj = $this->xmlObj->xpath($this->name)[0];
 
         $itemClass = new $this->class($obj, $this->name);

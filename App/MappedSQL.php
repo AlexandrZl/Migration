@@ -15,13 +15,24 @@ class MappedSQL
 
     public function apply()
     {
+        if ($this->entity == 'book') {
+            var_dump($this->object);die;
+        }
         foreach ($this->object as $key => $field) {
             switch(true) {
                 case $field instanceof PrimaryField:
                     $this->createMD5();
-                    if(!$this->findExternalId()){
-                        $this->createExternalId();
+                    $externalId = $this->findExternalId();
+                    if(!$externalId){
                         $this->id = $this->createInternalId();
+                        $this->createExternalId();
+                    } else {
+                        $internalId = $externalId['internalId'];
+                        if(!$this->findInternalId($internalId)) {
+                            $this->createInternalId($internalId);
+                        } else {
+                            $this->id = $internalId;
+                        }
                     }
                     break;
             }
@@ -48,17 +59,23 @@ class MappedSQL
         return $sql->findByExternalId($this->md5, $this->entity);
     }
 
+    protected function findInternalId($id)
+    {
+        $sql = new TemplatedSQL();
+        return $sql->findByInternalId($id, $this->entity);
+    }
+
     protected function createExternalId()
     {
         $sql = new TemplatedSQL();
-        $result = $sql->newExternalId($this->md5, $this->entity);
+        $result = $sql->newExternalId($this->md5, $this->entity, $this->id);
         return $result;
     }
 
-    protected function createInternalId()
+    protected function createInternalId($id = null)
     {
         $sql = new TemplatedSQL();
-        $result = $sql->newInternalId($this->object, $this->entity);
+        $result = $sql->newInternalId($this->object, $this->entity, $id);
         return $result;
     }
 }

@@ -28,12 +28,32 @@ class TemplatedSQL
         return $result;
     }
 
+    public function findByInternalId($id, $nameField)
+    {
+        $table = $nameField;
+
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE `id` = :id limit 1");
+        $q->bindValue(':id', $id);
+        $q->execute();
+
+        try {
+            $q->execute();
+            $result = $q->fetch(PDO::FETCH_ASSOC)['id'];
+        }
+        catch (Exception $e) {
+            $result = false;
+        }
+
+        return $result;
+    }
+
     public function createEntity($name)
     {
         $table = 'entity_'.$name;
         try {
             $sql ="CREATE table $table(
-             `externalId` VARCHAR ( 50 ) NOT NULL);";
+             `externalId` VARCHAR ( 50 ) NOT NULL,
+             `internalId` VARCHAR ( 50 ) NOT NULL);";
             $this->pdo->exec($sql);
             CLIMessage::show("Created $name Table", "success");
             return $name;
@@ -42,11 +62,26 @@ class TemplatedSQL
         }
     }
 
-    public function newExternalId($id, $nameField)
+    public function createEntityRef($name, $entity)
+    {
+        $table = $entity.'_'.$name;
+        try {
+            $sql ="CREATE table $table(
+             $entity VARCHAR ( 50 ) NOT NULL,
+             $name VARCHAR ( 50 ) NOT NULL);";
+            $this->pdo->exec($sql);
+            CLIMessage::show("Created $name Table", "success");
+            return $name;
+        } catch(PDOException $e) {
+            return false;
+        }
+    }
+
+    public function newExternalId($id, $nameField, $internalId)
     {
         $table = 'entity_'.$nameField;
 
-        $sql = "INSERT INTO $table (`externalId`) VALUES ('$id')";
+        $sql = "INSERT INTO $table (`externalId`, `internalId`) VALUES ('$id', '$internalId')";
 
         try {
             $this->pdo->exec($sql);
@@ -59,7 +94,7 @@ class TemplatedSQL
         return $result;
     }
 
-    public function newInternalId($obj, $entity)
+    public function newInternalId($obj, $entity, $existId = null)
     {
         $sql = "INSERT INTO $entity (";
         $fields = array();
@@ -81,16 +116,25 @@ class TemplatedSQL
 
         foreach ($obj as $field) {
             if ($field instanceof PrimaryField) {
-                $sql .= "null, ";
+                if ($existId) {
+                    $sql .= $existId.", ";
+                } else {
+                    $sql .= "null, ";
+                }
             }
             else if ($field instanceof ReferenceFieldMultiple) {
                 $sql .= $field->getValue().", ";
             } else {
-                $sql .= "'".$field->getValue()."', ";
+                if ($field->getValue() == null) {
+                    $sql .= "null, ";
+                } else {
+                    $sql .= "'".$field->getValue()."', ";
+                }
             }
         }
         $sql = substr($sql, 0, -2);
         $sql .= ")";
+
 
         try {
             $this->pdo->exec($sql);
@@ -99,6 +143,7 @@ class TemplatedSQL
         catch (Exception $e) {
             $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
         }
+
         return $result;
     }
 
