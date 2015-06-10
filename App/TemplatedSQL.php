@@ -144,6 +144,8 @@ class TemplatedSQL
 
         foreach ($obj as $key => $field) {
             if ($field instanceof PrimaryField) {
+                $sql .= $key . ", ";
+            } else if ($field instanceof AggregateField) {
                 $sql .= $key.", ";
             } else if ($field instanceof ReferenceField) {
                 $sql .= $field->getName().", ";
