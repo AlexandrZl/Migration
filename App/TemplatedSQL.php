@@ -94,6 +94,49 @@ class TemplatedSQL
         return $result;
     }
 
+    public function setReference($id, $ids, $name, $referName)
+    {
+        $table = $name."_".$referName;
+        $result = null;
+
+        foreach ($ids as $i) {
+            if(!$this->checkExistRefer($id, $i, $name, $referName)){
+                $sql = "INSERT INTO $table (`$name`, `$referName`) VALUES ('$id', '$i')";
+
+                try {
+                    $this->pdo->exec($sql);
+                    $result = true;
+                }
+                catch (Exception $e) {
+                    $result = false;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    protected function checkExistRefer($id, $i, $name, $referName)
+    {
+        $table = $name."_".$referName;
+
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE `$name` = :id AND `$referName` = :idRef limit 1");
+        $q->bindValue(':id', $id);
+        $q->bindValue(':idRef', $i);
+        $q->execute();
+
+        try {
+            $q->execute();
+            $result = $q->fetch(PDO::FETCH_ASSOC);
+            $result = $result ? true : false;
+        }
+        catch (Exception $e) {
+            $result = false;
+        }
+
+        return $result;
+    }
+
     public function newInternalId($obj, $entity, $existId = null)
     {
         $sql = "INSERT INTO $entity (";
@@ -139,6 +182,126 @@ class TemplatedSQL
         try {
             $this->pdo->exec($sql);
             $result = $this->findByInternalField($fields, $entity);
+        }
+        catch (Exception $e) {
+            $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
+        }
+
+        return $result;
+    }
+
+    public function setEntity($id, $obj, $entity)
+    {
+        $sql = "UPDATE `$entity` SET ";
+        $fields = array();
+
+        foreach ($obj as $key => $field) {
+            if ($field instanceof PrimaryField) {
+                continue;
+            } else if ($field instanceof ReferenceFieldMultiple) {
+                continue;
+            } else {
+                $sql .= "`".$key."` = :".$key.", ";
+                $fields[$field->getName()] = $field->getValue();
+            }
+
+        }
+
+        $sql .= "`mock` = :mock, ";
+        $sql = substr($sql, 0, -2);
+
+        $sql .= ' WHERE `id` = :id';
+
+
+        $q = $this->pdo->prepare($sql);
+        $q->bindValue(':id', $id);
+        $q->bindValue(':mock', 0);
+
+        foreach ($obj as $key => $value) {
+            if ($value instanceof PrimaryField) {
+                continue;
+            } else if ($value instanceof ReferenceFieldMultiple) {
+                continue;
+            } else {
+                $q->bindValue(':'.$key, $value->getValue());
+            }
+        }
+
+        try {
+            $q->execute();
+            $result = $this->findByInternalField($fields, $entity);
+        }
+        catch (Exception $e) {
+            $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
+        }
+
+        return $result;
+    }
+
+    public function isMock($id, $nameField)
+    {
+        $table = $nameField;
+
+        $q = $this->pdo->prepare("SELECT * FROM $table WHERE `id` = :id AND `mock` = :mock limit 1");
+        $q->bindValue(':mock', 1);
+        $q->bindValue(':id', $id);
+        $q->execute();
+
+        try {
+            $q->execute();
+            $result = $q->fetch(PDO::FETCH_ASSOC)['id'];
+            $result = $result ? true : false;
+        }
+        catch (Exception $e) {
+            $result = false;
+        }
+
+        return $result;
+    }
+
+    public function emptyInternalId($obj, $entity)
+    {
+        $sql = "INSERT INTO $entity (";
+        $fields = array();
+
+        foreach ($obj as $key => $field) {
+            if ($field instanceof PrimaryField) {
+                $sql .= $key.", ";
+            } else if ($field instanceof ReferenceField) {
+                continue;
+            } else if ($field instanceof ReferenceFieldMultiple) {
+                continue;
+            } else {
+                $sql .= $field->getName().", ";
+                $fields[$field->getName()] = $field->getValue();
+            }
+
+        }
+
+        $sql .= "mock , ";
+        $sql = substr($sql, 0, -2);
+        $sql .= ") VALUES (";
+
+        foreach ($obj as $field) {
+            if ($field instanceof PrimaryField) {
+                    $sql .= "null, ";
+            }
+            else if ($field instanceof ReferenceFieldMultiple) {
+                continue;
+            } else if ($field instanceof ReferenceField) {
+                    continue;
+            } else {
+                $sql .= "null, ";
+            }
+        }
+        $sql .= "1 , ";
+        $sql = substr($sql, 0, -2);
+        $sql .= ")";
+
+
+        try {
+            $this->pdo->exec($sql);
+            $result = $this->pdo->lastInsertId('id');
         }
         catch (Exception $e) {
             $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);

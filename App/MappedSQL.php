@@ -15,9 +15,6 @@ class MappedSQL
 
     public function apply()
     {
-        if ($this->entity == 'book') {
-            var_dump($this->object);die;
-        }
         foreach ($this->object as $key => $field) {
             switch(true) {
                 case $field instanceof PrimaryField:
@@ -31,6 +28,18 @@ class MappedSQL
                         if(!$this->findInternalId($internalId)) {
                             $this->createInternalId($internalId);
                         } else {
+                            if($this->isReferenceField()){
+                                if ($this->isMock($internalId)){
+                                    $this->setEntity($internalId);
+                                }
+                            }
+                            if($this->isReferenceFieldMultiple()){
+                                if ($this->isMock($internalId)){
+                                    $this->setEntity($internalId);
+                                    $reference = $this->getReferenceFieldMultiple();
+                                    $this->setReference($internalId, $reference->getValue(), $reference->getName());
+                                }
+                            }
                             $this->id = $internalId;
                         }
                     }
@@ -38,6 +47,80 @@ class MappedSQL
             }
         }
         return $this->id;
+    }
+
+
+    private function setReference($id, $ids, $referName)
+    {
+        $sql = new TemplatedSQL();
+        $result = $sql->setReference($id, $ids, $this->entity, $referName);
+        return $result;
+    }
+
+    public function isReferenceFieldMultiple()
+    {
+        $result = false;
+        foreach ($this->object as $key => $field) {
+            if ($field instanceof ReferenceFieldMultiple) {
+                $result = true;
+            }
+        }
+        return $result;
+    }
+
+    public function getReferenceFieldMultiple()
+    {
+        $result = false;
+        foreach ($this->object as $key => $field) {
+            if ($field instanceof ReferenceFieldMultiple) {
+                $result = $field;
+            }
+        }
+        return $result;
+    }
+
+    public function isReferenceField()
+    {
+        $result = false;
+        foreach ($this->object as $key => $field) {
+            if ($field instanceof ReferenceField) {
+                $result = true;
+            }
+        }
+        return $result;
+    }
+
+    public function emptyEntity()
+    {
+        foreach ($this->object as $key => $field) {
+            switch(true) {
+                case $field instanceof PrimaryField:
+                    $this->createMD5();
+                    $externalId = $this->findExternalId();
+                    if(!$externalId){
+                        $this->id = $this->createInternalIdEmpty();
+                        $this->id = $this->createExternalId();
+                    } else {
+                        $this->id = $externalId['internalId'];
+                    }
+                    break;
+            }
+        }
+        return $this->id;
+    }
+
+    protected function isMock($id)
+    {
+        $sql = new TemplatedSQL();
+        $result = $sql->isMock($id, $this->entity);
+        return $result;
+    }
+
+    protected function setEntity($id)
+    {
+        $sql = new TemplatedSQL();
+        $result = $sql->setEntity($id, $this->object, $this->entity);
+        return $result;
     }
 
     protected function createMD5()
@@ -69,6 +152,13 @@ class MappedSQL
     {
         $sql = new TemplatedSQL();
         $result = $sql->newExternalId($this->md5, $this->entity, $this->id);
+        return $result;
+    }
+
+    protected function createInternalIdEmpty()
+    {
+        $sql = new TemplatedSQL();
+        $result = $sql->emptyInternalId($this->object, $this->entity);
         return $result;
     }
 
