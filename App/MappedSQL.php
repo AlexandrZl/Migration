@@ -72,6 +72,7 @@ class MappedSQL
         foreach ($this->object as $key => $field) {
             if ($field instanceof ReferenceFieldMultiple) {
                 $result = $field;
+                break;
             }
         }
         return $result;
