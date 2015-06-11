@@ -71,8 +71,11 @@ class MappedSQL
         $result = false;
         foreach ($this->object as $key => $field) {
             if ($field instanceof ReferenceFieldMultiple) {
-                $result = $field;
-                break;
+                if (array_diff($field->getValue(), Table::getRef($key))) {
+                    Table::setRef($key,$field->getValue());
+                    $result = $field;
+                    break;
+                }
             }
         }
         return $result;

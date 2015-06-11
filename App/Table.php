@@ -5,6 +5,7 @@ abstract class Table
     protected $xmlObj;
     protected $map = array();
     protected $entity;
+    protected static $ref = array();
 
     public function apply()
     {
@@ -24,5 +25,21 @@ abstract class Table
         $sqlObject = new MappedSQL($this->map, $this->entity);
         return $sqlObject->emptyEntity();
     }
+
+    public static function getRef($key)
+    {
+        $empty = [];
+        if (isset(self::$ref[$key])) {
+            return self::$ref[$key];
+        }
+        return $empty;
+    }
+
+    public static function setRef($key, $value)
+    {
+        self::$ref[$key] = $value;
+        return self::$ref;
+    }
+
 
 }
