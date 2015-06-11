@@ -48,5 +48,4 @@ global $PDO;
 $manager = new Manager("books.xml");
 $manager->setClass('Book', 'book');
 $manager->setClass('Author', 'author');
-$manager->setClass('Article', 'article');
 $manager->saveAll();

@@ -11,9 +11,8 @@ class Book extends Table
             'date' => new AggregateField('date'),
             'title' => new StringField('title'),
             'public' => new BoolField('public'),
-//            'author' => new ReferenceField('Author', 'author'),
-            'article' => new ReferenceFieldMultiple('Article', 'article', $this->entity),
-            'author' => new ReferenceFieldMultiple('Author', 'author', $this->entity),
+            'author' => new ReferenceField('Author', 'author'),
+//            'author' => new ReferenceFieldMultiple('Author', 'author', $this->entity),
         );
 
         $this->map['date']->setSeparator('/');

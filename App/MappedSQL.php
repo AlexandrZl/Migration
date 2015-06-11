@@ -13,7 +13,7 @@ class MappedSQL
         $this->entity = $entity;
     }
 
-    public function apply()
+    public function apply($names = null)
     {
         foreach ($this->object as $key => $field) {
             switch(true) {
@@ -35,8 +35,10 @@ class MappedSQL
                             }
                             if($this->isReferenceFieldMultiple()){
                                 $this->setEntity($internalId);
-                                $reference = $this->getReferenceFieldMultiple();
-                                $this->setReference($internalId, $reference->getValue(), $reference->getName());
+                                foreach ($names as $name) {
+                                    $reference = $this->getReferenceFieldMultiple($name);
+                                    $this->setReference($internalId, $reference->getValue(), $reference->getName());
+                                }
                             }
                             $this->id = $internalId;
                         }
@@ -66,13 +68,12 @@ class MappedSQL
         return $result;
     }
 
-    public function getReferenceFieldMultiple()
+    public function getReferenceFieldMultiple($name)
     {
         $result = false;
         foreach ($this->object as $key => $field) {
             if ($field instanceof ReferenceFieldMultiple) {
-                if (array_diff($field->getValue(), Table::getRef($key))) {
-                    Table::setRef($key,$field->getValue());
+                if ($name == $key) {
                     $result = $field;
                     break;
                 }
