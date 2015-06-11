@@ -55,22 +55,32 @@ class TemplatedSQL
              `externalId` VARCHAR ( 50 ) NOT NULL,
              `internalId` VARCHAR ( 50 ) NOT NULL);";
             $this->pdo->exec($sql);
-            CLIMessage::show("Created $name Table", "success");
+            CLIMessage::show("Created $table Table", "success");
             return $name;
         } catch(PDOException $e) {
             return false;
         }
     }
 
+    protected function createEntityName($name, $entity)
+    {
+        $names = array();
+        $names[] = $name;
+        $names[] = $entity;
+        sort($names);
+        return $names;
+    }
+
     public function createEntityRef($name, $entity)
     {
-        $table = $entity.'_'.$name;
+        $names = $this->createEntityName($name, $entity);
+        $table = $names[0].'_'.$names[1];
         try {
             $sql ="CREATE table $table(
              $entity VARCHAR ( 50 ) NOT NULL,
              $name VARCHAR ( 50 ) NOT NULL);";
             $this->pdo->exec($sql);
-            CLIMessage::show("Created $name Table", "success");
+            CLIMessage::show("Created $table Table", "success");
             return $name;
         } catch(PDOException $e) {
             return false;
@@ -96,7 +106,8 @@ class TemplatedSQL
 
     public function setReference($id, $ids, $name, $referName)
     {
-        $table = $name."_".$referName;
+        $names = $this->createEntityName($name, $referName);
+        $table = $names[0].'_'.$names[1];
         $result = null;
 
         foreach ($ids as $i) {
@@ -118,7 +129,8 @@ class TemplatedSQL
 
     protected function checkExistRefer($id, $i, $name, $referName)
     {
-        $table = $name."_".$referName;
+        $names = $this->createEntityName($name, $referName);
+        $table = $names[0].'_'.$names[1];
 
         $q = $this->pdo->prepare("SELECT * FROM $table WHERE `$name` = :id AND `$referName` = :idRef limit 1");
         $q->bindValue(':id', $id);
