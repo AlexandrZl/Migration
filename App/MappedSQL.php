@@ -34,11 +34,9 @@ class MappedSQL
                                 }
                             }
                             if($this->isReferenceFieldMultiple()){
-                                if ($this->isMock($internalId)){
-                                    $this->setEntity($internalId);
-                                    $reference = $this->getReferenceFieldMultiple();
-                                    $this->setReference($internalId, $reference->getValue(), $reference->getName());
-                                }
+                                $this->setEntity($internalId);
+                                $reference = $this->getReferenceFieldMultiple();
+                                $this->setReference($internalId, $reference->getValue(), $reference->getName());
                             }
                             $this->id = $internalId;
                         }
