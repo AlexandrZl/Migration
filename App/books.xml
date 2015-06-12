@@ -5,13 +5,17 @@
         <date>
             <day>01</day>
             <month>02</month>
-            <year>1913</year>
+            <year>1900</year>
         </date>
         <public>true</public>
         <authors>
             <author>
                 <firstName>Remark</firstName>
                 <lastName>Erich</lastName>
+            </author>
+            <author>
+                <firstName>Jeck</firstName>
+                <lastName>London</lastName>
             </author>
         </authors>
     </book>

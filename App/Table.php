@@ -4,32 +4,25 @@ abstract class Table
 {
     protected $xmlObj;
     protected $map = array();
-    protected $entity;
+    public $primaryField;
+    public $entity;
     protected $ref = array();
 
     public function apply()
     {
+        $this->primaryField->value($this->xmlObj);
+        $id = $this->primaryField->getObj($this->entity);
         foreach ($this->map as $key => $field) {
-            if ($field instanceof ReferenceFieldMultiple || $field instanceof ReferenceField) {
-                $this->createEmptyEntity();
-                if ($field instanceof ReferenceFieldMultiple) {
-                    $field->value($this->xmlObj);
-                    $this->ref[] = $field->getName();
-                    continue;
-                }
-            }
             $field->value($this->xmlObj);
         }
 
-        $names = $this->ref ? $this->ref : null;
         $sqlObject = new MappedSQL($this->map, $this->entity);
-        return $sqlObject->apply($names);
+        return $sqlObject->apply($id);
     }
 
-    protected function createEmptyEntity()
+    public function getObj()
     {
-        $sqlObject = new MappedSQL($this->map, $this->entity);
-        return $sqlObject->emptyEntity();
+        return $this->map;
     }
 
 }

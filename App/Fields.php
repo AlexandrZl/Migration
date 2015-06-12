@@ -26,4 +26,9 @@ abstract class Fields
         $this->xmlObj = $obj;
         return $this->getValuePath();
     }
+
+    public function getObj()
+    {
+        return $this->getValue();
+    }
 }

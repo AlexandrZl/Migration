@@ -149,6 +149,47 @@ class TemplatedSQL
         return $result;
     }
 
+    public function save($obj, $entity)
+    {
+        $sql = "UPDATE `$entity` SET ";
+        $fields = array();
+
+        foreach ($obj as $key => $value) {
+            if (is_array($value)) {
+                continue;
+            } else {
+                $sql .= "`".$key."` = :".$key.", ";
+                $fields[$key] = $value;
+            }
+        }
+
+        $sql .= "`mock` = :mock, ";
+        $sql = substr($sql, 0, -2);
+
+        $sql .= ' WHERE `id` = :id';
+
+        $q = $this->pdo->prepare($sql);
+        $q->bindValue(':mock', 0);
+
+        foreach ($obj as $key => $value) {
+            if (is_array($value)) {
+                continue;
+            } else {
+                $q->bindValue(':'.$key, $value);
+            }
+        }
+
+        try {
+            $q->execute();
+            $result = $this->findByInternalField($fields, $entity);
+        }
+        catch (Exception $e) {
+            $result['id'] = filter_var($e->errorInfo[2], FILTER_SANITIZE_NUMBER_INT);
+        }
+
+        return $result;
+    }
+
     public function newInternalId($obj, $entity, $existId = null)
     {
         $sql = "INSERT INTO $entity (";
@@ -273,45 +314,9 @@ class TemplatedSQL
         return $result;
     }
 
-    public function emptyInternalId($obj, $entity)
+    public function emptyInternalId($entity)
     {
-        $sql = "INSERT INTO $entity (";
-        $fields = array();
-
-        foreach ($obj as $key => $field) {
-            if ($field instanceof PrimaryField) {
-                $sql .= $key.", ";
-            } else if ($field instanceof ReferenceField) {
-                continue;
-            } else if ($field instanceof ReferenceFieldMultiple) {
-                continue;
-            } else {
-                $sql .= $field->getName().", ";
-                $fields[$field->getName()] = $field->getValue();
-            }
-
-        }
-
-        $sql .= "mock , ";
-        $sql = substr($sql, 0, -2);
-        $sql .= ") VALUES (";
-
-        foreach ($obj as $field) {
-            if ($field instanceof PrimaryField) {
-                    $sql .= "null, ";
-            }
-            else if ($field instanceof ReferenceFieldMultiple) {
-                continue;
-            } else if ($field instanceof ReferenceField) {
-                    continue;
-            } else {
-                $sql .= "null, ";
-            }
-        }
-        $sql .= "1 , ";
-        $sql = substr($sql, 0, -2);
-        $sql .= ")";
-
+        $sql = "INSERT INTO $entity (id,mock) VALUES (null, 1);";
 
         try {
             $this->pdo->exec($sql);

@@ -7,10 +7,11 @@ class Author extends Table
         $this->xmlObj = $obj;
         $this->entity = $name;
         $this->map = array(
-            'id' => new PrimaryField('firstName'),
             'firstName' => new StringField('firstName'),
             'lastName' => new StringField('lastName'),
         );
+        $this->primaryField = new PrimaryField('firstName');
+
     }
 
 }
